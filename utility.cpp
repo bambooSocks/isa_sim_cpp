@@ -4,12 +4,18 @@
 
 #include "utility.h"
 
-std::vector<int> utility::loadFile(const char *filename) {
+/**
+ * Function for loading the binary file and converting it into
+ * a standard vector of integers
+ * @param filepath  the path to the binary file
+ * @return          instructions in int vector
+ */
+std::vector<int> utility::loadFile(const char *filepath) {
     std::ifstream file;
-    file.open(filename);
+    //TODO: handle if the file doesn't exist!!
+    file.open(filepath);
     std::string lines;
 
-    //TODO: handle if the file doesn't exist!!
     if (file.is_open()) {
         std::string line;
         while (getline (file, line)) {

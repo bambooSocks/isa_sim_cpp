@@ -5,9 +5,11 @@ set(CMAKE_CXX_STANDARD 17)
 
 set(SOURCES
         main.cpp
+        registerfile.cpp
         utility.cpp
 )
 set(HEADERS
+        registerfile.h
         utility.h
 )
 

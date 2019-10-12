@@ -12,7 +12,7 @@
 
 namespace utility{
 
-    std::vector<int> loadFile (const char * filename);
+    std::vector<int> loadFile (const char * filepath);
 
 
 }
