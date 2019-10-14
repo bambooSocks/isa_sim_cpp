@@ -2,8 +2,8 @@
 // Created by matej on 10/10/19.
 //
 
-#ifndef ISA_SIM_CPP_REGISTERFILE_H
-#define ISA_SIM_CPP_REGISTERFILE_H
+#ifndef ISA_SIM_CPP_REGISTER_FILE_H
+#define ISA_SIM_CPP_REGISTER_FILE_H
 
 
 #include <array>
@@ -19,7 +19,8 @@ public:
     RegisterFile();
     void write (Register reg, uint data);
     uint read (Register reg);
+    void print_registers ();
 };
 
 
-#endif //ISA_SIM_CPP_REGISTERFILE_H
+#endif //ISA_SIM_CPP_REGISTER_FILE_H

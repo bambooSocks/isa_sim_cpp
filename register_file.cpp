@@ -3,7 +3,7 @@
 //
 
 #include <iostream>
-#include "registerfile.h"
+#include "register_file.h"
 
 RegisterFile::RegisterFile () {
     for (int i = 0; i < m_reg_file.size(); i++){
@@ -26,4 +26,8 @@ void RegisterFile::write (RegisterFile::Register reg, uint data) {
     }
 
     m_reg_file[reg] = data;
+}
+
+void RegisterFile::print_registers () {
+
 }

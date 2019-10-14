@@ -1,7 +1,12 @@
 #include <iostream>
-#include "utility.h"
+
+#include "isa_simulator.h"
+
 
 int main () {
-    std::vector<int> inst = utility::loadFile("../test/main");
+    ISA_Simulator sim;
+    if (sim.loadFile("../test/file.o")) {
+        while (sim.executeInstruction());
+    }
     return 0;
 }
