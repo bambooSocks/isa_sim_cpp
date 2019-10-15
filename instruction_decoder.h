@@ -5,6 +5,8 @@
 #ifndef ISA_SIM_CPP_INSTRUCTION_DECODER_H
 #define ISA_SIM_CPP_INSTRUCTION_DECODER_H
 
+#include "register_file.h"
+
 /**
  * Instruction type decoders
  */
@@ -13,10 +15,10 @@ union r_inst_t {
     unsigned int inst;
     struct {
         unsigned char opcode: 7;
-        unsigned char rd: 5;
+        RegisterFile::Register rd: 5;
         unsigned char funct3: 3;
-        unsigned char rs1: 5;
-        unsigned char rs2: 5;
+        RegisterFile::Register rs1: 5;
+        RegisterFile::Register rs2: 5;
         unsigned char funct7: 7;
     } f; // fields
 };
@@ -25,9 +27,9 @@ union i_inst_t {
     unsigned int inst;
     struct {
         unsigned char opcode: 7;
-        unsigned char rd: 5;
+        RegisterFile::Register rd: 5;
         unsigned char funct3: 3;
-        unsigned char rs1: 5;
+        RegisterFile::Register rs1: 5;
         unsigned short imm: 12;
     } f; // fields
 };
@@ -38,8 +40,8 @@ union s_inst_t {
         unsigned char opcode: 7;
         unsigned char imm4_0: 5;
         unsigned char funct3: 3;
-        unsigned char rs1: 5;
-        unsigned char rs2: 5;
+        RegisterFile::Register rs1: 5;
+        RegisterFile::Register rs2: 5;
         unsigned char imm5_11: 7;
     } f; // fields
 };
@@ -51,8 +53,8 @@ union b_inst_t {
         unsigned char imm11: 1;
         unsigned char imm4_1: 4;
         unsigned char funct3: 3;
-        unsigned char rs1: 5;
-        unsigned char rs2: 5;
+        RegisterFile::Register rs1: 5;
+        RegisterFile::Register rs2: 5;
         unsigned char imm5_10: 6;
         unsigned char imm12: 1;
     } f; // fields
@@ -62,8 +64,8 @@ union u_inst_t {
     unsigned int inst;
     struct {
         unsigned char opcode: 7;
-        unsigned char rd: 5;
-        unsigned char imm31_12: 20;
+        RegisterFile::Register rd: 5;
+        unsigned int imm31_12: 20;
     } f; // fields
 };
 
@@ -71,7 +73,7 @@ union j_inst_t {
     unsigned int inst;
     struct {
         unsigned char opcode: 7;
-        unsigned char rd: 5;
+        RegisterFile::Register rd: 5;
         unsigned char imm19_12: 8;
         unsigned char imm11: 1;
         unsigned short imm10_1: 10;
@@ -83,7 +85,14 @@ union j_inst_t {
  * Interface for instruction decoder
  */
 class InstructionDecoder {
+protected:
+    RegisterFile *reg;
+    unsigned char rd;
+    unsigned char rs1;
+    unsigned char rs2;
+    unsigned int imm;
 public:
+    InstructionDecoder ();
     virtual void decode (unsigned int inst) = 0;
 };
 

@@ -3,6 +3,7 @@
 //
 
 #include <iostream>
+#include <cmath>
 #include "instruction_decoder.h"
 
 /**
@@ -10,7 +11,7 @@
  * @param inst  raw instruction
  */
 void RegArithLogDecoder::decode (unsigned int inst) {
-    r_inst_t decoder;
+    r_inst_t decoder{};
     decoder.inst = inst;
 
     // if bit 0 in funct7 is 0 execute basic arithmetic and logic instructions,
@@ -22,8 +23,6 @@ void RegArithLogDecoder::decode (unsigned int inst) {
         // M extension
         m_extension_decode(decoder);
     }
-
-
 }
 
 /**
@@ -31,45 +30,54 @@ void RegArithLogDecoder::decode (unsigned int inst) {
  * for the base instructions in RISCV32I
  * @param inst  raw instruction
  */
-void RegArithLogDecoder::i_extension_decode (RegArithLogDecoder::r_inst_t decoder) {
+void RegArithLogDecoder::i_extension_decode (r_inst_t decoder) {
+    rs1 = reg->read(decoder.f.rs1);
+    rs2 = reg->read(decoder.f.rs2);
+
     switch (decoder.f.funct3) {
         case 0b000:
             // check the bit 6 in funct7
-            if (decoder.f.funct7 & 0x20u == 0) {
+            if (!(decoder.f.funct7 & 0x20u)) {
                 // ADD
-            } else if (decoder.f.funct7 & 0x20u == 1) {
-                // SUB
+                reg->write(decoder.f.rd, int(rs1) + int(rs2));
             } else {
-                // error
+                // SUB
+                reg->write(decoder.f.rd, int(rs1) - int(rs2));
             }
             break;
         case 0b001:
             // SLL
+            reg->write(decoder.f.rd, rs1 << rs2);
             break;
         case 0b010:
             // SLT
+            reg->write(decoder.f.rd, int(rs1) < int(rs2));
             break;
         case 0b011:
             // SLTU
+            reg->write(decoder.f.rd, rs1 < rs2);
             break;
         case 0b100:
             // XOR
+            reg->write(decoder.f.rd, rs1 ^ rs2);
             break;
         case 0b101:
             // check the bit 6 in funct7
-            if (decoder.f.funct7 & 0x20u == 0) {
+            if (!(decoder.f.funct7 & 0x20u)) {
                 // SRL
-            } else if (decoder.f.funct7 & 0x20u == 1) {
-                // SRA
+                reg->write(decoder.f.rd, rs1 >> rs2);
             } else {
-                // error
+                // SRA
+                reg->write(decoder.f.rd, int(rs1) / pow(2.,rs2));
             }
             break;
         case 0b110:
             // OR
+            reg->write(decoder.f.rd, rs1 | rs2);
             break;
         case 0b111:
             // AND
+            reg->write(decoder.f.rd, rs1 & rs2);
             break;
         default:
             std::cerr << "Invalid funct3 while reg arith log I decoding: " << decoder.f.funct3 << "\n";
@@ -82,31 +90,46 @@ void RegArithLogDecoder::i_extension_decode (RegArithLogDecoder::r_inst_t decode
  * for the base instructions in RISCV32M
  * @param inst  raw instruction
  */
-void RegArithLogDecoder::m_extension_decode (RegArithLogDecoder::r_inst_t decoder) {
+void RegArithLogDecoder::m_extension_decode (r_inst_t decoder) {
+    long long temp;
+    rs1 = reg->read(decoder.f.rs1);
+    rs2 = reg->read(decoder.f.rs2);
+
     switch (decoder.f.funct3) {
         case 0b000:
             // MUL
+            reg->write(decoder.f.rd, rs1 * rs2);
             break;
         case 0b001:
             // MULH
+            temp = int(rs1) * int(rs2);
+            reg->write(decoder.f.rd, temp >> 32);
             break;
         case 0b010:
             // MULHSU
+            temp = int(rs1) * rs2;
+            reg->write(decoder.f.rd, temp >> 32);
             break;
         case 0b011:
             // MLHU
+            temp = rs1 * rs2;
+            reg->write(decoder.f.rd, temp >> 32);
             break;
         case 0b100:
             // DIV
+            reg->write(decoder.f.rd, int(rs1) / int(rs2));
             break;
         case 0b101:
             // DIVU
+            reg->write(decoder.f.rd, rs1 / rs2);
             break;
         case 0b110:
             // REM
+            reg->write(decoder.f.rd, int(rs1) % int(rs2));
             break;
         case 0b111:
             // REMU
+            reg->write(decoder.f.rd, rs1 % rs2);
             break;
         default:
             std::cerr << "Invalid funct3 while reg arith log M decoding: " << decoder.f.funct3 << "\n";
@@ -119,40 +142,50 @@ void RegArithLogDecoder::m_extension_decode (RegArithLogDecoder::r_inst_t decode
  * @param inst  raw instruction
  */
 void ImmArithLogDecoder::decode (unsigned int inst) {
-    i_inst_t decoder;
+    i_inst_t decoder{};
     decoder.inst = inst;
+
+    rs1 = reg->read(decoder.f.rs1);
+    imm = decoder.f.imm;
 
     switch (decoder.f.funct3) {
         case 0b000:
             // ADDI
+            reg->write(decoder.f.rd, int(rs1) + int(imm));
             break;
         case 0b001:
             // SLLI
+            reg->write(decoder.f.rd, rs1 << imm);
             break;
         case 0b010:
             // SLTI
+            reg->write(decoder.f.rd, int(rs1) < int(imm));
             break;
         case 0b011:
             // SLTIU
+            reg->write(decoder.f.rd, rs1 < imm);
             break;
         case 0b100:
             // XORI
+            reg->write(decoder.f.rd, rs1 ^ imm);
             break;
         case 0b101:
             // check the bit 10 in imm
-            if (decoder.f.imm & 0x0400u == 0) {
-                // SRL
-            } else if (decoder.f.imm & 0x0400u == 1) {
-                // SRA
+            if (!(decoder.f.imm & 0x0400u)) {
+                // SRLI
+                reg->write(decoder.f.rd, rs1 >> imm);
             } else {
-                // error
+                // SRAI
+                reg->write(decoder.f.rd, int(rs1) / pow(2.,imm));
             }
             break;
         case 0b110:
             // ORI
+            reg->write(decoder.f.rd, rs1 | imm);
             break;
         case 0b111:
             // ANDI
+            reg->write(decoder.f.rd, rs1 & imm);
             break;
         default:
             std::cerr << "Invalid funct3 while imm arith log decoding: " << decoder.f.funct3 << "\n";
@@ -165,7 +198,7 @@ void ImmArithLogDecoder::decode (unsigned int inst) {
  * @param inst  raw instruction
  */
 void LoadDecoder::decode (unsigned int inst) {
-    i_inst_t decoder;
+    i_inst_t decoder{};
     decoder.inst = inst;
 
     switch (decoder.f.funct3) {
@@ -195,10 +228,10 @@ void LoadDecoder::decode (unsigned int inst) {
  * @param inst  raw instruction
  */
 void StoreDecoder::decode (unsigned int inst) {
-    s_inst_t decoder;
+    s_inst_t decoder{};
     decoder.inst = inst;
 
-    unsigned short imm = decoder.f.imm4_0 | (decoder.f.imm5_11 << 5);
+    imm = decoder.f.imm4_0 | (decoder.f.imm5_11 << 5u);
 
     switch (decoder.f.funct3) {
         case 0b000:
@@ -221,11 +254,11 @@ void StoreDecoder::decode (unsigned int inst) {
  * @param inst  raw instruction
  */
 void BranchDecoder::decode (unsigned int inst) {
-    b_inst_t decoder;
+    b_inst_t decoder{};
     decoder.inst = inst;
 
-    unsigned short imm = (decoder.f.imm4_1 << 1) | (decoder.f.imm5_10 << 5) |
-                         (decoder.f.imm11 << 11) | (decoder.f.imm12 << 12);
+    imm = (decoder.f.imm4_1 << 1u) | (decoder.f.imm5_10 << 5u) |
+                         (decoder.f.imm11 << 11u) | (decoder.f.imm12 << 12u);
 
     switch (decoder.f.funct3) {
         case 0b000:
@@ -257,10 +290,10 @@ void BranchDecoder::decode (unsigned int inst) {
  * @param inst  raw instruction
  */
 void UpperImmDecoder::decode (unsigned int inst) {
-    u_inst_t decoder;
+    u_inst_t decoder{};
     decoder.inst = inst;
 
-    unsigned short imm = decoder.f.imm31_12 << 12;
+    imm = int(decoder.f.imm31_12) << 12u;
 
     if (decoder.f.opcode == 0b0110111) {
         // LUI
@@ -274,11 +307,11 @@ void UpperImmDecoder::decode (unsigned int inst) {
  * @param inst  raw instruction
  */
 void JumpLinkDecoder::decode (unsigned int inst) {
-    j_inst_t decoder;
+    j_inst_t decoder{};
     decoder.inst = inst;
 
-    unsigned short imm = (decoder.f.imm10_1 << 1) | (decoder.f.imm11 << 11) |
-                         (decoder.f.imm19_12 << 12) | (decoder.f.imm20 << 20);
+    imm = (decoder.f.imm10_1 << 1u) | (decoder.f.imm11 << 11u) |
+          (decoder.f.imm19_12 << 12u) | (decoder.f.imm20 << 20u);
 
     // JAL
 }
@@ -288,8 +321,19 @@ void JumpLinkDecoder::decode (unsigned int inst) {
  * @param inst  raw instruction
  */
 void JumpLinkRegDecoder::decode (unsigned int inst) {
-    i_inst_t decoder;
+    i_inst_t decoder{};
     decoder.inst = inst;
 
+    //temp
+    imm = decoder.f.imm;
+
     //JALR
+}
+
+InstructionDecoder::InstructionDecoder () {
+    reg = RegisterFile::getInstance();
+    rd = 0;
+    rs1 = 0;
+    rs2 = 0;
+    imm = 0;
 }
