@@ -10,6 +10,7 @@
 
 ISA_Simulator::ISA_Simulator () {
     pc = 0;
+    registerFile = RegisterFile::getInstance();
     // setup the opcode lookup map
     opcode_map.insert({0b0110011, new RegArithLogDecoder});
     opcode_map.insert({0b0010011, new ImmArithLogDecoder});
@@ -47,6 +48,7 @@ bool ISA_Simulator::loadFile (const char *filepath) {
         }
         file.close();
     }
+
     auto *temp = reinterpret_cast<unsigned int*>(lines.data());
     raw_insts.insert(raw_insts.end(), &temp[0], &temp[lines.length() / 4]);
     return true;
@@ -61,10 +63,13 @@ bool ISA_Simulator::executeInstruction () {
         // fetch instruction
         unsigned int inst = raw_insts.at(pc);
         // decode instruction and execute
-        unsigned char opcode = inst & 0x0000001Fu;
+        unsigned char opcode = inst & 0x0000007Fu;
         opcode_map.at(opcode)->decode(inst);
 
         //TODO: branches and jumps!!!
+
+        // just for debugging
+        registerFile->print_registers();
         pc++;
     } catch (const std::out_of_range& e) {
         //TODO: handle wrong pc

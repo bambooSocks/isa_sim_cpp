@@ -8,6 +8,7 @@
 #include <vector>
 #include <map>
 #include "instruction_decoder.h"
+#include "register_file.h"
 
 class ISA_Simulator {
 public:
@@ -16,6 +17,7 @@ public:
     bool executeInstruction ();
 private:
     unsigned int pc;
+    RegisterFile *registerFile;
     std::vector<unsigned int> raw_insts;
     std::map<unsigned int, InstructionDecoder*> opcode_map;
 };
