@@ -87,9 +87,8 @@ union j_inst_t {
 class InstructionDecoder {
 protected:
     RegisterFile *reg;
-    unsigned char rd;
-    unsigned char rs1;
-    unsigned char rs2;
+    unsigned int rs1;
+    unsigned int rs2;
     unsigned int imm;
 public:
     InstructionDecoder ();

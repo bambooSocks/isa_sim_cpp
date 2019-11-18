@@ -147,6 +147,10 @@ void ImmArithLogDecoder::decode (unsigned int inst) {
 
     rs1 = reg->read(decoder.f.rs1);
     imm = decoder.f.imm;
+    // sign-extend if negative
+    if (imm & 0x800) {
+        imm |= 0xFFFFF000;
+    }
 
     switch (decoder.f.funct3) {
         case 0b000:
@@ -259,6 +263,10 @@ void BranchDecoder::decode (unsigned int inst) {
 
     imm = (decoder.f.imm4_1 << 1u) | (decoder.f.imm5_10 << 5u) |
                          (decoder.f.imm11 << 11u) | (decoder.f.imm12 << 12u);
+    // sign-extend if negative
+    if (imm & 0x1000) {
+        imm &= 0xFFFFE000;
+    }
 
     switch (decoder.f.funct3) {
         case 0b000:
@@ -293,12 +301,15 @@ void UpperImmDecoder::decode (unsigned int inst) {
     u_inst_t decoder{};
     decoder.inst = inst;
 
-    imm = int(decoder.f.imm31_12) << 12u;
+    imm = int(decoder.f.imm31_12) << 12u & 0xFFFFF000u;
 
     if (decoder.f.opcode == 0b0110111) {
         // LUI
+        reg->write(decoder.f.rd, imm);
     } else if (decoder.f.opcode == 0b0010111) {
         // AUIPC
+        //TODO: figure out how to handle pc
+//        reg->write(decoder.f.rd, (pc*4)+imm);
     }
 }
 
@@ -332,7 +343,6 @@ void JumpLinkRegDecoder::decode (unsigned int inst) {
 
 InstructionDecoder::InstructionDecoder () {
     reg = RegisterFile::getInstance();
-    rd = 0;
     rs1 = 0;
     rs2 = 0;
     imm = 0;
