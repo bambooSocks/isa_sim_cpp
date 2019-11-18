@@ -29,7 +29,7 @@ void RegisterFile::write (RegisterFile::Register reg, uint data) {
 }
 
 void RegisterFile::print_registers () {
-    std::cout << "Register file:";
+    std::cout << "Register file:\n";
     for (unsigned long i = 0; i < m_reg_file.size(); i++) {
         std::cout << "x" << i << " - " << m_reg_file[i] << "\n";
     }

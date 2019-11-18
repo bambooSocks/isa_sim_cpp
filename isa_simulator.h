@@ -10,11 +10,18 @@
 #include "instruction_decoder.h"
 #include "register_file.h"
 
+typedef enum {
+    EXEC_OK,
+    EXEC_ERROR,
+    EXEC_EOF
+} exec_result_t;
+
+
 class ISA_Simulator {
 public:
     ISA_Simulator ();
     bool loadFile (const char * filepath);
-    bool executeInstruction ();
+    exec_result_t executeInstruction ();
 private:
     unsigned int pc;
     RegisterFile *registerFile;

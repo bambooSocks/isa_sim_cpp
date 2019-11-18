@@ -5,6 +5,7 @@
 #include <filesystem>
 #include <iostream>
 #include <fstream>
+#include <bitset>
 #include "isa_simulator.h"
 
 
@@ -58,23 +59,48 @@ bool ISA_Simulator::loadFile (const char *filepath) {
  *
  * @return  false if EOF is reached otherwise true
  */
-bool ISA_Simulator::executeInstruction () {
+exec_result_t ISA_Simulator::executeInstruction () {
+    unsigned char opcode;
     try {
         // fetch instruction
         unsigned int inst = raw_insts.at(pc);
         // decode instruction and execute
-        unsigned char opcode = inst & 0x0000007Fu;
+        opcode = inst & 0x0000007Fu;
         opcode_map.at(opcode)->decode(inst);
 
         //TODO: branches and jumps!!!
 
         // just for debugging
+        std::cout << "Program counter: " << pc << "\n";
         registerFile->print_registers();
         pc++;
     } catch (const std::out_of_range& e) {
-        //TODO: handle wrong pc
-        return false;
+        std::string exception = e.what();
+        // distinguish between individual exceptions
+        if (exception.find("vector::_M_range_check") != std::string::npos) {
+            // out of range of raw_insts
+            if (pc == raw_insts.size() + 1) {
+                // one further than the size => EOF
+                //TODO: implement termination function
+                return EXEC_EOF;
+            } else {
+                //wrong address (pc)
+                std::cerr << "Wrong instruction address: pc=" << pc*4 << "\n";
+                //TODO: implement termination with error function
+                return EXEC_ERROR;
+            }
+        } else if (exception.find("map::at") != std::string::npos) {
+            // wrong opcode
+            std::cerr << "Wrong opcode or not implemented instruction: opcode=" <<
+                            std::bitset<7>(opcode).to_string() << "\n";
+            //TODO: implement termination with error function
+            return EXEC_ERROR;
+        } else {
+            // other error
+            std::cerr << "Unknown error occurred\n";
+            //TODO: implement termination with error function
+            return EXEC_ERROR;
+        }
     }
-
-    return true;
+    return EXEC_OK;
 }
