@@ -92,7 +92,7 @@ protected:
     unsigned int imm;
 public:
     InstructionDecoder ();
-    virtual void decode (unsigned int inst) = 0;
+    virtual unsigned int decode (unsigned int pc, unsigned int inst) = 0;
 };
 
 /**
@@ -100,10 +100,10 @@ public:
  */
 class RegArithLogDecoder : public InstructionDecoder {
 private:
-    void i_extension_decode (r_inst_t decoder);
-    void m_extension_decode (r_inst_t decoder);
+    unsigned int i_extension_decode (unsigned int pc, r_inst_t decoder);
+    unsigned int m_extension_decode (unsigned int pc, r_inst_t decoder);
 public:
-    void decode (unsigned int inst) override;
+    unsigned int decode (unsigned int pc, unsigned int inst) override;
 };
 
 /**
@@ -111,7 +111,7 @@ public:
  */
 class ImmArithLogDecoder : public InstructionDecoder {
 public:
-    void decode (unsigned int inst) override;
+    unsigned int decode (unsigned int pc, unsigned int inst) override;
 };
 
 /**
@@ -119,7 +119,7 @@ public:
  */
 class LoadDecoder : public InstructionDecoder {
 public:
-    void decode (unsigned int inst) override;
+    unsigned int decode (unsigned int pc, unsigned int inst) override;
 };
 
 /**
@@ -127,7 +127,7 @@ public:
  */
 class StoreDecoder : public InstructionDecoder {
 public:
-    void decode (unsigned int inst) override;
+    unsigned int decode (unsigned int pc, unsigned int inst) override;
 };
 
 /**
@@ -135,7 +135,7 @@ public:
  */
 class BranchDecoder : public InstructionDecoder {
 public:
-    void decode (unsigned int inst) override;
+    unsigned int decode (unsigned int pc, unsigned int inst) override;
 };
 
 /**
@@ -143,7 +143,7 @@ public:
  */
 class UpperImmDecoder : public InstructionDecoder {
 public:
-    void decode (unsigned int inst) override;
+    unsigned int decode (unsigned int pc, unsigned int inst) override;
 };
 
 /**
@@ -151,7 +151,7 @@ public:
  */
 class JumpLinkDecoder : public InstructionDecoder {
 public:
-    void decode (unsigned int inst) override;
+    unsigned int decode (unsigned int pc, unsigned int inst) override;
 };
 
 /**
@@ -159,7 +159,7 @@ public:
  */
 class JumpLinkRegDecoder : public InstructionDecoder {
 public:
-    void decode (unsigned int inst) override;
+    unsigned int decode (unsigned int pc, unsigned int inst) override;
 };
 
 #endif //ISA_SIM_CPP_INSTRUCTION_DECODER_H

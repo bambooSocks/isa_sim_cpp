@@ -60,20 +60,20 @@ bool ISA_Simulator::loadFile (const char *filepath) {
  * @return  false if EOF is reached otherwise true
  */
 exec_result_t ISA_Simulator::executeInstruction () {
-    unsigned char opcode;
+    unsigned char opcode = 0;
     try {
         // fetch instruction
-        unsigned int inst = raw_insts.at(pc);
+        unsigned int inst = raw_insts.at(pc / 4);
         // decode instruction and execute
         opcode = inst & 0x0000007Fu;
-        opcode_map.at(opcode)->decode(inst);
-
-        //TODO: branches and jumps!!!
 
         // just for debugging
         std::cout << "Program counter: " << pc << "\n";
         registerFile->print_registers();
-        pc++;
+
+        // execute instruction and update pc
+        pc = opcode_map.at(opcode)->decode(pc, inst);
+
     } catch (const std::out_of_range& e) {
         std::string exception = e.what();
         // distinguish between individual exceptions

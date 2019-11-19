@@ -10,7 +10,7 @@
  * Function decoding register-register arithmetic and logic instructions
  * @param inst  raw instruction
  */
-void RegArithLogDecoder::decode (unsigned int inst) {
+unsigned int RegArithLogDecoder::decode (unsigned int pc, unsigned int inst) {
     r_inst_t decoder{};
     decoder.inst = inst;
 
@@ -18,10 +18,10 @@ void RegArithLogDecoder::decode (unsigned int inst) {
     // otherwise execute instructions from M extension.
     if (!(decoder.f.funct7 & 0x01u)) {
         // I extension
-        i_extension_decode(decoder);
+        return i_extension_decode(pc, decoder);
     } else {
         // M extension
-        m_extension_decode(decoder);
+        return m_extension_decode(pc, decoder);
     }
 }
 
@@ -30,7 +30,7 @@ void RegArithLogDecoder::decode (unsigned int inst) {
  * for the base instructions in RISCV32I
  * @param inst  raw instruction
  */
-void RegArithLogDecoder::i_extension_decode (r_inst_t decoder) {
+unsigned int RegArithLogDecoder::i_extension_decode (unsigned int pc, r_inst_t decoder) {
     rs1 = reg->read(decoder.f.rs1);
     rs2 = reg->read(decoder.f.rs2);
 
@@ -83,6 +83,7 @@ void RegArithLogDecoder::i_extension_decode (r_inst_t decoder) {
             std::cerr << "Invalid funct3 while reg arith log I decoding: " << decoder.f.funct3 << "\n";
             exit(1);
     }
+    return pc+4;
 }
 
 /**
@@ -90,7 +91,7 @@ void RegArithLogDecoder::i_extension_decode (r_inst_t decoder) {
  * for the base instructions in RISCV32M
  * @param inst  raw instruction
  */
-void RegArithLogDecoder::m_extension_decode (r_inst_t decoder) {
+unsigned int RegArithLogDecoder::m_extension_decode (unsigned int pc, r_inst_t decoder) {
     long long temp;
     rs1 = reg->read(decoder.f.rs1);
     rs2 = reg->read(decoder.f.rs2);
@@ -135,13 +136,14 @@ void RegArithLogDecoder::m_extension_decode (r_inst_t decoder) {
             std::cerr << "Invalid funct3 while reg arith log M decoding: " << decoder.f.funct3 << "\n";
             exit(1);
     }
+    return pc+4;
 }
 
 /**
  * Function decoding register-immediate arithmetic and logic instructions
  * @param inst  raw instruction
  */
-void ImmArithLogDecoder::decode (unsigned int inst) {
+unsigned int ImmArithLogDecoder::decode (unsigned int pc, unsigned int inst) {
     i_inst_t decoder{};
     decoder.inst = inst;
 
@@ -195,13 +197,14 @@ void ImmArithLogDecoder::decode (unsigned int inst) {
             std::cerr << "Invalid funct3 while imm arith log decoding: " << decoder.f.funct3 << "\n";
             exit(1);
     }
+    return pc+4;
 }
 
 /**
  * Function decoding load instructions
  * @param inst  raw instruction
  */
-void LoadDecoder::decode (unsigned int inst) {
+unsigned int LoadDecoder::decode (unsigned int pc, unsigned int inst) {
     i_inst_t decoder{};
     decoder.inst = inst;
 
@@ -225,13 +228,14 @@ void LoadDecoder::decode (unsigned int inst) {
             std::cerr << "Invalid funct3 while load decoding: " << decoder.f.funct3 << "\n";
             exit(1);
     }
+    return pc+4;
 }
 
 /**
  * Function decoding store instructions
  * @param inst  raw instruction
  */
-void StoreDecoder::decode (unsigned int inst) {
+unsigned int StoreDecoder::decode (unsigned int pc, unsigned int inst) {
     s_inst_t decoder{};
     decoder.inst = inst;
 
@@ -251,53 +255,75 @@ void StoreDecoder::decode (unsigned int inst) {
             std::cerr << "Invalid funct3 while store decoding: " << decoder.f.funct3 << "\n";
             exit(1);
     }
+    return pc+4;
 }
 
 /**
  * Function decoding branch instructions
  * @param inst  raw instruction
  */
-void BranchDecoder::decode (unsigned int inst) {
+unsigned int BranchDecoder::decode (unsigned int pc, unsigned int inst) {
     b_inst_t decoder{};
     decoder.inst = inst;
 
+    rs1 = decoder.f.rs1;
+    rs2 = decoder.f.rs2;
     imm = (decoder.f.imm4_1 << 1u) | (decoder.f.imm5_10 << 5u) |
                          (decoder.f.imm11 << 11u) | (decoder.f.imm12 << 12u);
     // sign-extend if negative
     if (imm & 0x1000) {
-        imm &= 0xFFFFE000;
+        imm |= 0xFFFFE000;
     }
 
     switch (decoder.f.funct3) {
         case 0b000:
             // BEQ
+            if (rs1 == rs2) {
+                return pc + imm;
+            }
             break;
         case 0b001:
             // BNE
+            if (rs1 != rs2) {
+                return pc + imm;
+            }
             break;
         case 0b100:
             // BLT
+            if (int(rs1) < int(rs2)) {
+                return pc + imm;
+            }
             break;
         case 0b101:
             // BGE
+            if (int(rs1) >= int(rs2)) {
+                return pc + imm;
+            }
             break;
         case 0b110:
             // BLTU
+            if (rs1 < rs2) {
+                return pc + imm;
+            }
             break;
         case 0b111:
             // BGEU
+            if (rs1 >= rs2) {
+                return pc + imm;
+            }
             break;
         default:
             std::cerr << "Invalid funct3 while branch decoding: " << decoder.f.funct3 << "\n";
             exit(1);
     }
+    return pc+4;
 }
 
 /**
  * Function decoding upper immediate instructions
  * @param inst  raw instruction
  */
-void UpperImmDecoder::decode (unsigned int inst) {
+unsigned int UpperImmDecoder::decode (unsigned int pc, unsigned int inst) {
     u_inst_t decoder{};
     decoder.inst = inst;
 
@@ -308,37 +334,57 @@ void UpperImmDecoder::decode (unsigned int inst) {
         reg->write(decoder.f.rd, imm);
     } else if (decoder.f.opcode == 0b0010111) {
         // AUIPC
-        //TODO: figure out how to handle pc
-//        reg->write(decoder.f.rd, (pc*4)+imm);
+        reg->write(decoder.f.rd, (pc*4)+imm);
     }
+    return pc+4;
 }
 
 /**
  * Function decoding JAL instruction
  * @param inst  raw instruction
  */
-void JumpLinkDecoder::decode (unsigned int inst) {
+unsigned int JumpLinkDecoder::decode (unsigned int pc, unsigned int inst) {
     j_inst_t decoder{};
     decoder.inst = inst;
 
     imm = (decoder.f.imm10_1 << 1u) | (decoder.f.imm11 << 11u) |
           (decoder.f.imm19_12 << 12u) | (decoder.f.imm20 << 20u);
+    // sign-extend if negative
+    if (imm & 0x80000) {
+        imm |= 0xFFF00000;
+    }
+
+    reg->write(decoder.f.rd, pc+4);
 
     // JAL
+    return pc + imm;
 }
 
 /**
  * Function decoding JALR instruction
  * @param inst  raw instruction
  */
-void JumpLinkRegDecoder::decode (unsigned int inst) {
+unsigned int JumpLinkRegDecoder::decode (unsigned int pc, unsigned int inst) {
     i_inst_t decoder{};
     decoder.inst = inst;
 
     //temp
+    rs1 = reg->read(decoder.f.rs1);
     imm = decoder.f.imm;
+    // sign-extend if negative
+    if (imm & 0x800) {
+        imm |= 0xFFFFF000;
+    }
+
+    // The target address is obtained by adding the sign-extended
+    // 12-bit I-immediate to the register rs1, then setting
+    // the least-significant bit of the result to zero.
+    unsigned int offset = (rs1 + imm) & 0xFFFFFFFEu;
+
+    reg->write(decoder.f.rd, pc+4);
 
     //JALR
+    return pc + offset;
 }
 
 InstructionDecoder::InstructionDecoder () {
