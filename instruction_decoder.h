@@ -6,6 +6,7 @@
 #define ISA_SIM_CPP_INSTRUCTION_DECODER_H
 
 #include "register_file.h"
+#include "stack.h"
 
 /**
  * Instruction type decoders
@@ -87,6 +88,7 @@ union j_inst_t {
 class InstructionDecoder {
 protected:
     RegisterFile *reg;
+    Stack *stack;
     unsigned int rs1;
     unsigned int rs2;
     unsigned int imm;

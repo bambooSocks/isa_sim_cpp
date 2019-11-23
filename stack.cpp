@@ -4,6 +4,8 @@
 
 #include "stack.h"
 
+Stack* Stack::instance = nullptr;
+
 Stack::Stack () {}
 
 void Stack::writeByte (unsigned int sp, unsigned char data) {
@@ -45,3 +47,12 @@ unsigned int Stack::readWord (unsigned int sp) {
     unsigned int data = m_stack.at(index) + (m_stack.at(index+1) << 8) + (m_stack.at(index+2) << 18) + (m_stack.at(index+3) << 24);
     return data;
 }
+
+Stack *Stack::getInstance () {
+    if (instance == nullptr) {
+        instance = new Stack();
+    }
+    return instance;
+}
+
+

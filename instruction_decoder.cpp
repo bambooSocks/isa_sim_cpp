@@ -207,22 +207,41 @@ unsigned int ImmArithLogDecoder::decode (unsigned int pc, unsigned int inst) {
 unsigned int LoadDecoder::decode (unsigned int pc, unsigned int inst) {
     i_inst_t decoder{};
     decoder.inst = inst;
+    unsigned int data;
+
+    rs1 = reg->read(decoder.f.rs1);
+    imm = decoder.f.imm;
+    // sign-extend if negative
+    if (imm & 0x800) {
+        imm |= 0xFFFFF000;
+    }
+    unsigned int sp = rs1 + imm;
 
     switch (decoder.f.funct3) {
         case 0b000:
             // LB
+            data = stack->readByte(sp);
+            // sign-extend if negative
+            if (data & 0x80) {
+                data |= 0xFFFFFF00;
+            }
+            reg->write(decoder.f.rd, data);
             break;
         case 0b001:
             // LH
+            //TODO: this
             break;
         case 0b010:
             // LW
+            //TODO: this
             break;
         case 0b100:
             // LBU
+            //TODO: this
             break;
         case 0b101:
             // LHU
+            //TODO: this
             break;
         default:
             std::cerr << "Invalid funct3 while load decoding: " << decoder.f.funct3 << "\n";
@@ -239,17 +258,28 @@ unsigned int StoreDecoder::decode (unsigned int pc, unsigned int inst) {
     s_inst_t decoder{};
     decoder.inst = inst;
 
+    //TODO: check registers
+    rs1 = reg->read(decoder.f.rs1);
+    rs2 = reg->read(decoder.f.rs2);
     imm = decoder.f.imm4_0 | (decoder.f.imm5_11 << 5u);
+    // sign-extend if negative
+    if (imm & 0x800) {
+        imm |= 0xFFFFF000;
+    }
+    unsigned int sp = rs1 + imm;
 
     switch (decoder.f.funct3) {
         case 0b000:
             // SB
+            stack->writeByte(sp, rs2);
             break;
         case 0b001:
             // SH
+            //TODO: this
             break;
         case 0b010:
             // SW
+            //TODO: this
             break;
         default:
             std::cerr << "Invalid funct3 while store decoding: " << decoder.f.funct3 << "\n";
@@ -389,6 +419,7 @@ unsigned int JumpLinkRegDecoder::decode (unsigned int pc, unsigned int inst) {
 
 InstructionDecoder::InstructionDecoder () {
     reg = RegisterFile::getInstance();
+    stack = Stack::getInstance();
     rs1 = 0;
     rs2 = 0;
     imm = 0;

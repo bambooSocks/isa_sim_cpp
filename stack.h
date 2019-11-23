@@ -13,11 +13,13 @@ class Stack {
 private:
     //TODO: ask about stack size
     std::array<unsigned char, STACK_SIZE> m_stack;
+    static Stack *instance;
 
     static unsigned int stack_pointer_to_index (unsigned int sp);
+    Stack ();
 
 public:
-    Stack ();
+    static Stack *getInstance ();
     void writeByte (unsigned int sp, unsigned char data);
     void writeHalf (unsigned int sp, unsigned short data);
     void writeWord (unsigned int sp, unsigned int data);
