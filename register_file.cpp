@@ -20,7 +20,7 @@ unsigned int RegisterFile::read(RegisterFile::Register reg) {
     return m_reg_file[reg];
 }
 
-void RegisterFile::write (RegisterFile::Register reg, uint data) {
+void RegisterFile::write (RegisterFile::Register reg, unsigned int data) {
     if (reg == x0) {
         std::cout << "Register x0 cannot be written to\n";
         return;

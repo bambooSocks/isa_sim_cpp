@@ -393,3 +393,40 @@ InstructionDecoder::InstructionDecoder () {
     rs2 = 0;
     imm = 0;
 }
+
+unsigned int EcallDecoder::decode(unsigned int pc, unsigned int inst) {
+    i_inst_t decoder{};
+    decoder.inst = inst;
+
+    //temp
+    rs1 = reg->read(decoder.f.rs1);
+    imm = decoder.f.imm;
+
+    //We need only check immediate that it is 0b000000000000 (rather than 0b000000000001), in order to find ecall
+    if (imm == 0 && decoder.f.funct3 == 0) {
+        switch (reg->read(RegisterFile::x10)) {
+            case 10: // exit
+                // terminate correctly
+                // print registers
+                break;
+            case 17: // exit2
+                // terminate with error
+                // print registers
+                break;
+            default:
+                std::cerr << "Unsupported instruction\r\n";
+                exit(1);
+        }
+    } else {
+        std::cerr << "Unsupported instruction\r\n";
+        exit(1);
+    }
+
+    // Should I implement this somehow, to indicate we are at the end of file,
+    // in order to jump out of the main while-loop
+    //sim.executeInstruction() = EXEC_EOF
+
+    //Ecall
+    // FIXME: Should it return program counter or just 0??
+    return -1;
+}

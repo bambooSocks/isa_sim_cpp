@@ -6,6 +6,7 @@
 #include <iostream>
 #include <fstream>
 #include <bitset>
+#include <string>
 #include "isa_simulator.h"
 
 
@@ -22,6 +23,7 @@ ISA_Simulator::ISA_Simulator () {
     opcode_map.insert({0b0010111, new UpperImmDecoder});
     opcode_map.insert({0b1101111, new JumpLinkDecoder});
     opcode_map.insert({0b1100111, new JumpLinkRegDecoder});
+    opcode_map.insert({0b1110011, new EcallDecoder});
 }
 
 /**
@@ -44,7 +46,7 @@ bool ISA_Simulator::loadFile (const char *filepath) {
 
     if (file.is_open()) {
         std::string line;
-        while (getline (file, line)) {
+        while (std::getline (file, line)) {
             lines.append(line);
         }
         file.close();

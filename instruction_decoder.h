@@ -162,4 +162,12 @@ public:
     unsigned int decode (unsigned int pc, unsigned int inst) override;
 };
 
+/**
+ * Ecall instruction decoder
+ */
+class EcallDecoder : public InstructionDecoder {
+public:
+    unsigned int decode (unsigned int pc, unsigned int inst) override;
+};
+
 #endif //ISA_SIM_CPP_INSTRUCTION_DECODER_H
