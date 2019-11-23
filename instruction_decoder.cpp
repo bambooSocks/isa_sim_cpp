@@ -334,7 +334,7 @@ unsigned int UpperImmDecoder::decode (unsigned int pc, unsigned int inst) {
         reg->write(decoder.f.rd, imm);
     } else if (decoder.f.opcode == 0b0010111) {
         // AUIPC
-        reg->write(decoder.f.rd, (pc*4)+imm);
+        reg->write(decoder.f.rd, pc + imm);
     }
     return pc+4;
 }
@@ -347,11 +347,12 @@ unsigned int JumpLinkDecoder::decode (unsigned int pc, unsigned int inst) {
     j_inst_t decoder{};
     decoder.inst = inst;
 
+    // TODO: test
     imm = (decoder.f.imm10_1 << 1u) | (decoder.f.imm11 << 11u) |
           (decoder.f.imm19_12 << 12u) | (decoder.f.imm20 << 20u);
     // sign-extend if negative
-    if (imm & 0x80000) {
-        imm |= 0xFFF00000;
+    if (imm & 0x100000) {
+        imm |= 0xFFE00000;
     }
 
     reg->write(decoder.f.rd, pc+4);
@@ -368,7 +369,6 @@ unsigned int JumpLinkRegDecoder::decode (unsigned int pc, unsigned int inst) {
     i_inst_t decoder{};
     decoder.inst = inst;
 
-    //temp
     rs1 = reg->read(decoder.f.rs1);
     imm = decoder.f.imm;
     // sign-extend if negative

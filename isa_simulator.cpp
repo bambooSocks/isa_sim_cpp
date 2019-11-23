@@ -79,13 +79,14 @@ exec_result_t ISA_Simulator::executeInstruction () {
         // distinguish between individual exceptions
         if (exception.find("vector::_M_range_check") != std::string::npos) {
             // out of range of raw_insts
-            if (pc == raw_insts.size() + 1) {
+            //TODO: test this
+            if (pc == raw_insts.size()*4 + 4) {
                 // one further than the size => EOF
                 //TODO: implement termination function
                 return EXEC_EOF;
             } else {
                 //wrong address (pc)
-                std::cerr << "Wrong instruction address: pc=" << pc*4 << "\n";
+                std::cerr << "Wrong instruction address: pc=" << pc << "\n";
                 //TODO: implement termination with error function
                 return EXEC_ERROR;
             }

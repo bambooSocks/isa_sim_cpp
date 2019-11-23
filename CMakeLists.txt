@@ -17,7 +17,7 @@ set(HEADERS
         isa_simulator.h
         register_file.h
         instruction_decoder.h
-        )
+        stack.cpp stack.h)
 
 add_executable(${EXECUTABLE} ${SOURCES} ${HEADERS})
 
