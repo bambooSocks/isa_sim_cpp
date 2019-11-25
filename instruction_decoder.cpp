@@ -68,7 +68,7 @@ unsigned int RegArithLogDecoder::i_extension_decode (unsigned int pc, r_inst_t d
                 reg->write(decoder.f.rd, rs1 >> rs2);
             } else {
                 // SRA
-                reg->write(decoder.f.rd, int(rs1) / pow(2.,rs2));
+                reg->write(decoder.f.rd, int(rs1) / int(pow(2.,rs2)));
             }
             break;
         case 0b110:
@@ -182,7 +182,8 @@ unsigned int ImmArithLogDecoder::decode (unsigned int pc, unsigned int inst) {
                 reg->write(decoder.f.rd, rs1 >> imm);
             } else {
                 // SRAI
-                reg->write(decoder.f.rd, int(rs1) / pow(2.,imm));
+                imm &= 0x1F;
+                reg->write(decoder.f.rd, int(rs1) / int(pow(2.,imm)));
             }
             break;
         case 0b110:
@@ -303,8 +304,8 @@ unsigned int BranchDecoder::decode (unsigned int pc, unsigned int inst) {
     b_inst_t decoder{};
     decoder.inst = inst;
 
-    rs1 = decoder.f.rs1;
-    rs2 = decoder.f.rs2;
+    rs1 = reg->read(decoder.f.rs1);
+    rs2 = reg->read(decoder.f.rs2);
     imm = (decoder.f.imm4_1 << 1u) | (decoder.f.imm5_10 << 5u) |
                          (decoder.f.imm11 << 11u) | (decoder.f.imm12 << 12u);
     // sign-extend if negative
@@ -316,37 +317,37 @@ unsigned int BranchDecoder::decode (unsigned int pc, unsigned int inst) {
         case 0b000:
             // BEQ
             if (rs1 == rs2) {
-                return pc + imm;
+                return pc + int(imm);
             }
             break;
         case 0b001:
             // BNE
             if (rs1 != rs2) {
-                return pc + imm;
+                return pc + int(imm);
             }
             break;
         case 0b100:
             // BLT
             if (int(rs1) < int(rs2)) {
-                return pc + imm;
+                return pc + int(imm);
             }
             break;
         case 0b101:
             // BGE
             if (int(rs1) >= int(rs2)) {
-                return pc + imm;
+                return pc + int(imm);
             }
             break;
         case 0b110:
             // BLTU
             if (rs1 < rs2) {
-                return pc + imm;
+                return pc + int(imm);
             }
             break;
         case 0b111:
             // BGEU
             if (rs1 >= rs2) {
-                return pc + imm;
+                return pc + int(imm);
             }
             break;
         default:

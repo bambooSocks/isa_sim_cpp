@@ -3,6 +3,7 @@
 //
 
 #include <iostream>
+#include <iomanip>
 #include "register_file.h"
 
 RegisterFile* RegisterFile::instance = nullptr;
@@ -31,7 +32,8 @@ void RegisterFile::write (RegisterFile::Register reg, unsigned int data) {
 void RegisterFile::print_registers () {
     std::cout << "Register file:\n";
     for (unsigned long i = 0; i < m_reg_file.size(); i++) {
-        std::cout << "x" << i << " - " << m_reg_file[i] << "\n";
+        std::cout << std::dec << "x" << i << " - " << m_reg_file[i] << "(" << int(m_reg_file[i]) << "), ";
+        std::cout << "0x" << std::setfill('0') << std::setw(8) << std::hex << m_reg_file[i] << "\n";
     }
 }
 

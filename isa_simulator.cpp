@@ -69,12 +69,16 @@ exec_result_t ISA_Simulator::executeInstruction () {
         // decode instruction and execute
         opcode = inst & 0x0000007Fu;
 
-        // just for debugging
-        std::cout << "Program counter: " << pc << "\n";
-        registerFile->print_registers();
-
         // execute instruction and update pc
         pc = opcode_map.at(opcode)->decode(pc, inst);
+
+        if (int(pc) == -1) {
+            terminate("ECALL instruction reached");
+        }
+
+        // just for debugging
+        std::cout << "\nProgram counter: " << std::dec << pc << "\n";
+        registerFile->print_registers();
 
     } catch (const std::out_of_range& e) {
         std::string exception = e.what();
@@ -84,26 +88,34 @@ exec_result_t ISA_Simulator::executeInstruction () {
             //TODO: test this
             if (pc == raw_insts.size()*4 + 4) {
                 // one further than the size => EOF
-                //TODO: implement termination function
+                terminate("End of file reached");
                 return EXEC_EOF;
             } else {
                 //wrong address (pc)
-                std::cerr << "Wrong instruction address: pc=" << pc << "\n";
-                //TODO: implement termination with error function
+                terminateWithError("Wrong instruction address: pc = " + std::to_string(pc), -1);
                 return EXEC_ERROR;
             }
         } else if (exception.find("map::at") != std::string::npos) {
             // wrong opcode
-            std::cerr << "Wrong opcode or not implemented instruction: opcode=" <<
-                            std::bitset<7>(opcode).to_string() << "\n";
-            //TODO: implement termination with error function
+            terminateWithError("Wrong opcode or not implemented instruction: opcode="
+                               + std::bitset<7>(opcode).to_string(), -1);
             return EXEC_ERROR;
         } else {
             // other error
-            std::cerr << "Unknown error occurred\n";
-            //TODO: implement termination with error function
+            terminateWithError("Unknown error occurred", -1);
             return EXEC_ERROR;
         }
     }
     return EXEC_OK;
+}
+
+void ISA_Simulator::terminate (std::string msg) {
+    std::cout << "\x1B[32m" << msg << "\x1B[0m\r\n";
+    exit(0);
+}
+
+void ISA_Simulator::terminateWithError (std::string msg, int exit_code) {
+    std::cout << "\x1B[31m" << msg << "\x1B[0m\r\n";
+    std::cout << "\x1B[31mTerminated with exit code: " << std::dec << int(exit_code) << "\x1B[0m\r\n";
+    exit(exit_code);
 }

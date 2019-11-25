@@ -13,7 +13,8 @@
 typedef enum {
     EXEC_OK,
     EXEC_ERROR,
-    EXEC_EOF
+    EXEC_EOF,
+    EXEC_ECALL
 } exec_result_t;
 
 
@@ -23,6 +24,8 @@ public:
     bool loadFile (const char * filepath);
     exec_result_t executeInstruction ();
 private:
+    void terminate (std::string msg);
+    void terminateWithError (std::string msg, int exit_code);
     unsigned int pc;
     RegisterFile *registerFile;
     std::vector<unsigned int> raw_insts;

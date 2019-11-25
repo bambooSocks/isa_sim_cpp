@@ -11,7 +11,7 @@
 
 class Stack {
 private:
-    //TODO: ask about stack size
+    //TODO: ask about stack size - maybe static
     std::array<unsigned char, STACK_SIZE> m_stack;
     static Stack *instance;
 
