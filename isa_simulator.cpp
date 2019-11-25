@@ -76,9 +76,10 @@ exec_result_t ISA_Simulator::executeInstruction () {
             terminate("ECALL instruction reached");
         }
 
-        // just for debugging
+#ifdef DEBUG
         std::cout << "\nProgram counter: " << std::dec << pc << "\n";
         registerFile->print_registers();
+#endif
 
     } catch (const std::out_of_range& e) {
         std::string exception = e.what();

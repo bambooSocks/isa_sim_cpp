@@ -34,23 +34,29 @@ unsigned int RegArithLogDecoder::i_extension_decode (unsigned int pc, r_inst_t d
     rs1 = reg->read(decoder.f.rs1);
     rs2 = reg->read(decoder.f.rs2);
 
+    std::string inst;
+
     switch (decoder.f.funct3) {
         case 0b000:
             // check the bit 6 in funct7
             if (!(decoder.f.funct7 & 0x20u)) {
                 // ADD
+                inst = "add";
                 reg->write(decoder.f.rd, int(rs1) + int(rs2));
             } else {
                 // SUB
+                inst = "sub";
                 reg->write(decoder.f.rd, int(rs1) - int(rs2));
             }
             break;
         case 0b001:
             // SLL
+            inst = "sll";
             reg->write(decoder.f.rd, rs1 << rs2);
             break;
         case 0b010:
             // SLT
+            inst = "slt";
             reg->write(decoder.f.rd, int(rs1) < int(rs2));
             break;
         case 0b011:
@@ -83,6 +89,9 @@ unsigned int RegArithLogDecoder::i_extension_decode (unsigned int pc, r_inst_t d
             std::cerr << "Invalid funct3 while reg arith log I decoding: " << decoder.f.funct3 << "\n";
             exit(1);
     }
+#ifdef DEBUG
+    std::cout << inst + " x" + std::to_string(decoder.f.rd) + ", x" + std::to_string(decoder.f.rs1) + ", x" + std::to_string(decoder.f.rs2) + "\r\n";
+#endif
     return pc+4;
 }
 
@@ -95,6 +104,8 @@ unsigned int RegArithLogDecoder::m_extension_decode (unsigned int pc, r_inst_t d
     long long temp;
     rs1 = reg->read(decoder.f.rs1);
     rs2 = reg->read(decoder.f.rs2);
+
+    std::string inst;
 
     switch (decoder.f.funct3) {
         case 0b000:
@@ -136,6 +147,9 @@ unsigned int RegArithLogDecoder::m_extension_decode (unsigned int pc, r_inst_t d
             std::cerr << "Invalid funct3 while reg arith log M decoding: " << decoder.f.funct3 << "\n";
             exit(1);
     }
+#ifdef DEBUG
+    std::cout << inst + " x" + std::to_string(decoder.f.rd) + ", x" + std::to_string(decoder.f.rs1) + ", x" + std::to_string(decoder.f.rs2) + "\r\n";
+#endif
     return pc+4;
 }
 
@@ -198,6 +212,7 @@ unsigned int ImmArithLogDecoder::decode (unsigned int pc, unsigned int inst) {
             std::cerr << "Invalid funct3 while imm arith log decoding: " << decoder.f.funct3 << "\n";
             exit(1);
     }
+
     return pc+4;
 }
 
