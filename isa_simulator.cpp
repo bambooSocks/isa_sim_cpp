@@ -110,13 +110,15 @@ exec_result_t ISA_Simulator::executeInstruction () {
     return EXEC_OK;
 }
 
-void ISA_Simulator::terminate (std::string msg) {
-    std::cout << "\x1B[32m" << msg << "\x1B[0m\r\n";
+void ISA_Simulator::terminate (const std::string& msg) {
+    std::cout << "\x1B[32m" << msg << "\x1B[0m\r\n\r\n";
+    registerFile->print_registers();
     exit(0);
 }
 
-void ISA_Simulator::terminateWithError (std::string msg, int exit_code) {
+void ISA_Simulator::terminateWithError (const std::string& msg, int exit_code) {
     std::cout << "\x1B[31m" << msg << "\x1B[0m\r\n";
-    std::cout << "\x1B[31mTerminated with exit code: " << std::dec << int(exit_code) << "\x1B[0m\r\n";
+    std::cout << "\x1B[31mTerminated with exit code: " << std::dec << int(exit_code) << "\x1B[0m\r\n\r\n";
+    registerFile->print_registers();
     exit(exit_code);
 }

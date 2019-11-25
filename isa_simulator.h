@@ -24,8 +24,8 @@ public:
     bool loadFile (const char * filepath);
     exec_result_t executeInstruction ();
 private:
-    void terminate (std::string msg);
-    void terminateWithError (std::string msg, int exit_code);
+    void terminate (const std::string& msg);
+    void terminateWithError (const std::string& msg, int exit_code);
     unsigned int pc;
     RegisterFile *registerFile;
     std::vector<unsigned int> raw_insts;

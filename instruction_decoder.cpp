@@ -7,9 +7,11 @@
 #include "instruction_decoder.h"
 
 /**
- * Function decoding register-register arithmetic and logic instructions
- * @param inst  raw instruction
- */
+* Function decoding register-register arithmetic and logic instructions
+* @param pc    program counter
+* @param inst  raw instruction
+* @return      new program counter
+*/
 unsigned int RegArithLogDecoder::decode (unsigned int pc, unsigned int inst) {
     r_inst_t decoder{};
     decoder.inst = inst;
@@ -28,7 +30,9 @@ unsigned int RegArithLogDecoder::decode (unsigned int pc, unsigned int inst) {
 /**
  * Function decoding register-register arithmetic and logic instructions
  * for the base instructions in RISCV32I
- * @param inst  raw instruction
+ * @param pc        program counter
+ * @param decoder   decoder union
+ * @return          new program counter
  */
 unsigned int RegArithLogDecoder::i_extension_decode (unsigned int pc, r_inst_t decoder) {
     rs1 = reg->read(decoder.f.rs1);
@@ -98,7 +102,9 @@ unsigned int RegArithLogDecoder::i_extension_decode (unsigned int pc, r_inst_t d
 /**
  * Function decoding register-register arithmetic and logic instructions
  * for the base instructions in RISCV32M
- * @param inst  raw instruction
+ * @param pc        program counter
+ * @param decoder   decoder union
+ * @return          new program counter
  */
 unsigned int RegArithLogDecoder::m_extension_decode (unsigned int pc, r_inst_t decoder) {
     long long temp;
@@ -154,9 +160,11 @@ unsigned int RegArithLogDecoder::m_extension_decode (unsigned int pc, r_inst_t d
 }
 
 /**
- * Function decoding register-immediate arithmetic and logic instructions
- * @param inst  raw instruction
- */
+* Function decoding register-immediate arithmetic and logic instructions
+* @param pc    program counter
+* @param inst  raw instruction
+* @return      new program counter
+*/
 unsigned int ImmArithLogDecoder::decode (unsigned int pc, unsigned int inst) {
     i_inst_t decoder{};
     decoder.inst = inst;
@@ -216,9 +224,12 @@ unsigned int ImmArithLogDecoder::decode (unsigned int pc, unsigned int inst) {
     return pc+4;
 }
 
+
 /**
  * Function decoding load instructions
+ * @param pc    program counter
  * @param inst  raw instruction
+ * @return      new program counter
  */
 unsigned int LoadDecoder::decode (unsigned int pc, unsigned int inst) {
     i_inst_t decoder{};
@@ -276,7 +287,9 @@ unsigned int LoadDecoder::decode (unsigned int pc, unsigned int inst) {
 
 /**
  * Function decoding store instructions
+ * @param pc    program counter
  * @param inst  raw instruction
+ * @return      new program counter
  */
 unsigned int StoreDecoder::decode (unsigned int pc, unsigned int inst) {
     s_inst_t decoder{};
@@ -312,9 +325,11 @@ unsigned int StoreDecoder::decode (unsigned int pc, unsigned int inst) {
 }
 
 /**
- * Function decoding branch instructions
- * @param inst  raw instruction
- */
+* Function decoding branch instructions
+* @param pc    program counter
+* @param inst  raw instruction
+* @return      new program counter
+*/
 unsigned int BranchDecoder::decode (unsigned int pc, unsigned int inst) {
     b_inst_t decoder{};
     decoder.inst = inst;
@@ -373,9 +388,11 @@ unsigned int BranchDecoder::decode (unsigned int pc, unsigned int inst) {
 }
 
 /**
- * Function decoding upper immediate instructions
- * @param inst  raw instruction
- */
+* Function decoding upper immediate instructions
+* @param pc    program counter
+* @param inst  raw instruction
+* @return      new program counter
+*/
 unsigned int UpperImmDecoder::decode (unsigned int pc, unsigned int inst) {
     u_inst_t decoder{};
     decoder.inst = inst;
@@ -393,9 +410,11 @@ unsigned int UpperImmDecoder::decode (unsigned int pc, unsigned int inst) {
 }
 
 /**
- * Function decoding JAL instruction
- * @param inst  raw instruction
- */
+* Function decoding JAL instructions
+* @param pc    program counter
+* @param inst  raw instruction
+* @return      new program counter
+*/
 unsigned int JumpLinkDecoder::decode (unsigned int pc, unsigned int inst) {
     j_inst_t decoder{};
     decoder.inst = inst;
@@ -415,9 +434,11 @@ unsigned int JumpLinkDecoder::decode (unsigned int pc, unsigned int inst) {
 }
 
 /**
- * Function decoding JALR instruction
- * @param inst  raw instruction
- */
+* Function decoding JALR instructions
+* @param pc    program counter
+* @param inst  raw instruction
+* @return      new program counter
+*/
 unsigned int JumpLinkRegDecoder::decode (unsigned int pc, unsigned int inst) {
     i_inst_t decoder{};
     decoder.inst = inst;
@@ -448,6 +469,12 @@ InstructionDecoder::InstructionDecoder () {
     imm = 0;
 }
 
+/**
+ * Function decoding environmental call instructions
+ * @param pc    program counter
+ * @param inst  raw instruction
+ * @return      new program counter
+ */
 unsigned int EcallDecoder::decode(unsigned int pc, unsigned int inst) {
     i_inst_t decoder{};
     decoder.inst = inst;
