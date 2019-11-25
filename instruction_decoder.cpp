@@ -229,19 +229,27 @@ unsigned int LoadDecoder::decode (unsigned int pc, unsigned int inst) {
             break;
         case 0b001:
             // LH
-            //TODO: this
+            data = stack->readHalf(sp);
+            // sign-extend if negative
+            if (data & 0x8000) {
+                data |= 0xFFFF0000;
+            }
+            reg->write(decoder.f.rd, data);
             break;
         case 0b010:
             // LW
-            //TODO: this
+            data = stack->readWord(sp);
+            reg->write(decoder.f.rd, data);
             break;
         case 0b100:
             // LBU
-            //TODO: this
+            data = stack->readByte(sp);
+            reg->write(decoder.f.rd, data);
             break;
         case 0b101:
             // LHU
-            //TODO: this
+            data = stack->readHalf(sp);
+            reg->write(decoder.f.rd, data);
             break;
         default:
             std::cerr << "Invalid funct3 while load decoding: " << decoder.f.funct3 << "\n";
@@ -258,7 +266,6 @@ unsigned int StoreDecoder::decode (unsigned int pc, unsigned int inst) {
     s_inst_t decoder{};
     decoder.inst = inst;
 
-    //TODO: check registers
     rs1 = reg->read(decoder.f.rs1);
     rs2 = reg->read(decoder.f.rs2);
     imm = decoder.f.imm4_0 | (decoder.f.imm5_11 << 5u);
@@ -275,11 +282,11 @@ unsigned int StoreDecoder::decode (unsigned int pc, unsigned int inst) {
             break;
         case 0b001:
             // SH
-            //TODO: this
+            stack->writeHalf(sp, rs2);
             break;
         case 0b010:
             // SW
-            //TODO: this
+            stack->writeWord(sp, rs2);
             break;
         default:
             std::cerr << "Invalid funct3 while store decoding: " << decoder.f.funct3 << "\n";
@@ -458,6 +465,6 @@ unsigned int EcallDecoder::decode(unsigned int pc, unsigned int inst) {
     //sim.executeInstruction() = EXEC_EOF
 
     //Ecall
-    // FIXME: Should it return program counter or just 0??
+    // FIXME: Should it return program counter or just -1??
     return -1;
 }
