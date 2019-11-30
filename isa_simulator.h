@@ -9,6 +9,8 @@
 #include <map>
 #include "instruction_decoder.h"
 #include "register_file.h"
+#include "isa_simulator.h"
+#include "termination.h"
 
 typedef enum {
     EXEC_OK,
@@ -24,9 +26,8 @@ public:
     bool loadFile (const char * filepath);
     exec_result_t executeInstruction ();
 private:
-    void terminate (const std::string& msg);
-    void terminateWithError (const std::string& msg, int exit_code);
     unsigned int pc;
+    Termination *term;
     RegisterFile *registerFile;
     std::vector<unsigned int> raw_insts;
     std::map<unsigned int, InstructionDecoder*> opcode_map;

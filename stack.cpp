@@ -16,15 +16,15 @@ void Stack::writeByte (unsigned int sp, unsigned char data) {
 void Stack::writeHalf (unsigned int sp, unsigned short data) {
     unsigned int index = stack_pointer_to_index(sp);
     m_stack.at(index) = data & 0x00FF;
-    m_stack.at(index+1) = (data & 0xFF00) >> 8;
+    m_stack.at(index-1) = (data & 0xFF00) >> 8;
 }
 
 void Stack::writeWord (unsigned int sp, unsigned int data) {
     unsigned int index = stack_pointer_to_index(sp);
     m_stack.at(index) = data & 0x000000FF;
-    m_stack.at(index+1) = (data & 0x0000FF00) >> 8;
-    m_stack.at(index+2) = (data & 0x00FF0000) >> 16;
-    m_stack.at(index+3) = (data & 0xFF000000) >> 24;
+    m_stack.at(index-1) = (data & 0x0000FF00) >> 8;
+    m_stack.at(index-2) = (data & 0x00FF0000) >> 16;
+    m_stack.at(index-3) = (data & 0xFF000000) >> 24;
 }
 
 unsigned int Stack::stack_pointer_to_index (unsigned int sp) {

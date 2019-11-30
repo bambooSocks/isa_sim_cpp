@@ -13,6 +13,7 @@
 ISA_Simulator::ISA_Simulator () {
     pc = 0;
     registerFile = RegisterFile::getInstance();
+    term = new Termination();
     // setup the opcode lookup map
     opcode_map.insert({0b0110011, new RegArithLogDecoder});
     opcode_map.insert({0b0010011, new ImmArithLogDecoder});
@@ -45,14 +46,15 @@ bool ISA_Simulator::loadFile (const char *filepath) {
     std::string lines;
 
     if (file.is_open()) {
-        std::string line;
-        while (std::getline (file, line)) {
-            lines.append(line);
+        char c;
+        while (file.get(c)) {
+            lines.append(&c,1);
         }
         file.close();
     }
 
     auto *temp = reinterpret_cast<unsigned int*>(lines.data());
+    std::cout << temp[4];
     raw_insts.insert(raw_insts.end(), &temp[0], &temp[lines.length() / 4]);
     return true;
 }
@@ -72,10 +74,6 @@ exec_result_t ISA_Simulator::executeInstruction () {
         // execute instruction and update pc
         pc = opcode_map.at(opcode)->decode(pc, inst);
 
-        if (int(pc) == -1) {
-            terminate("ECALL instruction reached");
-        }
-
 #ifdef DEBUG
         std::cout << "\nProgram counter: " << std::dec << pc << "\n";
         registerFile->print_registers();
@@ -89,36 +87,26 @@ exec_result_t ISA_Simulator::executeInstruction () {
             //TODO: test this
             if (pc == raw_insts.size()*4 + 4) {
                 // one further than the size => EOF
-                terminate("End of file reached");
+                term->terminate("End of file reached", 0);
                 return EXEC_EOF;
             } else {
                 //wrong address (pc)
-                terminateWithError("Wrong instruction address: pc = " + std::to_string(pc), -1);
+                term->terminate("Wrong instruction address: pc = " + std::to_string(pc), -1);
                 return EXEC_ERROR;
             }
         } else if (exception.find("map::at") != std::string::npos) {
             // wrong opcode
-            terminateWithError("Wrong opcode or not implemented instruction: opcode="
+            term->terminate("Wrong opcode or not implemented instruction: opcode="
                                + std::bitset<7>(opcode).to_string(), -1);
             return EXEC_ERROR;
         } else {
             // other error
-            terminateWithError("Unknown error occurred", -1);
+            std::string msg = "Unknown error occurred: ";
+            msg += e.what();
+            term->terminate(msg, -1);
             return EXEC_ERROR;
         }
     }
     return EXEC_OK;
 }
 
-void ISA_Simulator::terminate (const std::string& msg) {
-    std::cout << "\x1B[32m" << msg << "\x1B[0m\r\n\r\n";
-    registerFile->print_registers();
-    exit(0);
-}
-
-void ISA_Simulator::terminateWithError (const std::string& msg, int exit_code) {
-    std::cout << "\x1B[31m" << msg << "\x1B[0m\r\n";
-    std::cout << "\x1B[31mTerminated with exit code: " << std::dec << int(exit_code) << "\x1B[0m\r\n\r\n";
-    registerFile->print_registers();
-    exit(exit_code);
-}

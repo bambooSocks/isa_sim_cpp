@@ -7,6 +7,7 @@
 
 #include "register_file.h"
 #include "stack.h"
+#include "termination.h"
 
 /**
  * Instruction type decoders
@@ -15,56 +16,56 @@
 union r_inst_t {
     unsigned int inst;
     struct {
-        unsigned char opcode: 7;
+        unsigned int opcode: 7;
         RegisterFile::Register rd: 5;
-        unsigned char funct3: 3;
+        unsigned int funct3: 3;
         RegisterFile::Register rs1: 5;
         RegisterFile::Register rs2: 5;
-        unsigned char funct7: 7;
+        unsigned int funct7: 7;
     } f; // fields
 };
 
 union i_inst_t {
     unsigned int inst;
     struct {
-        unsigned char opcode: 7;
+        unsigned int opcode: 7;
         RegisterFile::Register rd: 5;
-        unsigned char funct3: 3;
+        unsigned int funct3: 3;
         RegisterFile::Register rs1: 5;
-        unsigned short imm: 12;
+        unsigned int imm: 12;
     } f; // fields
 };
 
 union s_inst_t {
     unsigned int inst;
     struct {
-        unsigned char opcode: 7;
-        unsigned char imm4_0: 5;
-        unsigned char funct3: 3;
+        unsigned int opcode: 7;
+        unsigned int imm4_0: 5;
+        unsigned int funct3: 3;
         RegisterFile::Register rs1: 5;
         RegisterFile::Register rs2: 5;
-        unsigned char imm5_11: 7;
+        unsigned int imm5_11: 7;
     } f; // fields
 };
 
 union b_inst_t {
     unsigned int inst;
     struct {
-        unsigned char opcode: 7;
-        unsigned char imm11: 1;
-        unsigned char imm4_1: 4;
-        unsigned char funct3: 3;
+        unsigned int opcode: 7;
+        unsigned int imm11: 1;
+        unsigned int imm4_1: 4;
+        unsigned int funct3: 3;
         RegisterFile::Register rs1: 5;
         RegisterFile::Register rs2: 5;
-        unsigned char imm5_10: 6;
-        unsigned char imm12: 1;
+        unsigned int imm5_10: 6;
+        unsigned int imm12: 1;
     } f; // fields
 };
 
 union u_inst_t {
     unsigned int inst;
     struct {
-        unsigned char opcode: 7;
+        unsigned int opcode: 7;
         RegisterFile::Register rd: 5;
         unsigned int imm31_12: 20;
     } f; // fields
@@ -73,12 +74,12 @@ union u_inst_t {
 union j_inst_t {
     unsigned int inst;
     struct {
-        unsigned char opcode: 7;
+        unsigned int opcode: 7;
         RegisterFile::Register rd: 5;
-        unsigned char imm19_12: 8;
-        unsigned char imm11: 1;
-        unsigned short imm10_1: 10;
-        unsigned char imm20: 1;
+        unsigned int imm19_12: 8;
+        unsigned int imm11: 1;
+        unsigned int imm10_1: 10;
+        unsigned int imm20: 1;
     } f; // fields
 };
 
@@ -92,6 +93,7 @@ protected:
     unsigned int rs1;
     unsigned int rs2;
     unsigned int imm;
+    Termination *term;
 public:
     InstructionDecoder ();
     virtual unsigned int decode (unsigned int pc, unsigned int inst) = 0;

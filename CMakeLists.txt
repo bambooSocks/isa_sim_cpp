@@ -11,13 +11,15 @@ set(SOURCES
         isa_simulator.cpp
         register_file.cpp
         instruction_decoder.cpp
-        )
+        stack.cpp
+        termination.cpp)
 
 set(HEADERS
         isa_simulator.h
         register_file.h
         instruction_decoder.h
-        stack.cpp stack.h)
+        stack.h
+        termination.h)
 
 add_executable(${EXECUTABLE} ${SOURCES} ${HEADERS})
 

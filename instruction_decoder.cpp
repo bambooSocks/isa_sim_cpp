@@ -8,6 +8,18 @@
 #include "instruction_decoder.h"
 
 /**
+ * InstructionDecoder base constructor
+ */
+InstructionDecoder::InstructionDecoder () {
+    term = new Termination();
+    reg = RegisterFile::getInstance();
+    stack = Stack::getInstance();
+    rs1 = 0;
+    rs2 = 0;
+    imm = 0;
+}
+
+/**
 * Function decoding register-register arithmetic and logic instructions
 * @param pc    program counter
 * @param inst  raw instruction
@@ -91,8 +103,9 @@ unsigned int RegArithLogDecoder::i_extension_decode (unsigned int pc, r_inst_t d
             reg->write(decoder.f.rd, rs1 & rs2);
             break;
         default:
-            std::cerr << "Invalid funct3 while reg arith log I decoding: " << decoder.f.funct3 << "\n";
-            exit(1);
+            term->terminate("Invalid funct3 while decoding register-register arithemtic or logical instruction (I): "
+                            + std::to_string(decoder.f.funct3) + "\n", 1);
+
     }
 #ifdef DEBUG
     std::cout << i_name + " x" + std::to_string(decoder.f.rd) + ", x" + std::to_string(decoder.f.rs1) + ", x" + std::to_string(decoder.f.rs2) + "\r\n";
@@ -159,8 +172,8 @@ unsigned int RegArithLogDecoder::m_extension_decode (unsigned int pc, r_inst_t d
             reg->write(decoder.f.rd, rs1 % rs2);
             break;
         default:
-            std::cerr << "Invalid funct3 while reg arith log M decoding: " << decoder.f.funct3 << "\n";
-            exit(1);
+            term->terminate("Invalid funct3 while decoding register-register arithemtic or logical instruction (M): "
+                            + std::to_string(decoder.f.funct3) + "\n", 1);
     }
 #ifdef DEBUG
     std::cout << i_name + " x" + std::to_string(decoder.f.rd) + ", x" + std::to_string(decoder.f.rs1) + ", x" + std::to_string(decoder.f.rs2) + "\r\n";
@@ -237,15 +250,14 @@ unsigned int ImmArithLogDecoder::decode (unsigned int pc, unsigned int inst) {
             reg->write(decoder.f.rd, rs1 & imm);
             break;
         default:
-            std::cerr << "Invalid funct3 while imm arith log decoding: " << decoder.f.funct3 << "\n";
-            exit(1);
+            term->terminate("Invalid funct3 while decoding register-immediate arithemtic or logical instruction: "
+                            + std::to_string(decoder.f.funct3) + "\n", 1);
     }
 #ifdef DEBUG
     std::cout << i_name + " x" + std::to_string(decoder.f.rd) + ", x" + std::to_string(decoder.f.rs1) + ", " + std::to_string(int(imm)) + "\r\n";
 #endif
     return pc+4;
 }
-
 
 /**
  * Function decoding load instructions
@@ -266,7 +278,7 @@ unsigned int LoadDecoder::decode (unsigned int pc, unsigned int inst) {
     if (imm & 0x800) {
         imm |= 0xFFFFF000;
     }
-    unsigned int sp = rs1 + imm;
+    unsigned int sp = int(rs1) + int(imm);
 
     switch (decoder.f.funct3) {
         case 0b000:
@@ -308,8 +320,8 @@ unsigned int LoadDecoder::decode (unsigned int pc, unsigned int inst) {
             reg->write(decoder.f.rd, data);
             break;
         default:
-            std::cerr << "Invalid funct3 while load decoding: " << decoder.f.funct3 << "\n";
-            exit(1);
+            term->terminate("Invalid funct3 while decoding load instruction: "
+                            + std::to_string(decoder.f.funct3) + "\n", 1);
     }
 #ifdef DEBUG
     std::cout << i_name + " x" + std::to_string(decoder.f.rd) + ", " + std::to_string(int(imm)) + "(x" + std::to_string(decoder.f.rs1) + ")\r\n";
@@ -336,7 +348,7 @@ unsigned int StoreDecoder::decode (unsigned int pc, unsigned int inst) {
     if (imm & 0x800) {
         imm |= 0xFFFFF000;
     }
-    unsigned int sp = rs1 + imm;
+    unsigned int sp = int(rs1) + int(imm);
 
     switch (decoder.f.funct3) {
         case 0b000:
@@ -355,11 +367,11 @@ unsigned int StoreDecoder::decode (unsigned int pc, unsigned int inst) {
             stack->writeWord(sp, rs2);
             break;
         default:
-            std::cerr << "Invalid funct3 while store decoding: " << decoder.f.funct3 << "\n";
-            exit(1);
+            term->terminate("Invalid funct3 while decoding store instruction: "
+                            + std::to_string(decoder.f.funct3) + "\n", 1);
     }
 #ifdef DEBUG
-    std::cout << i_name + " x" + std::to_string(decoder.f.rd) + ", " + std::to_string(int(imm)) + "(x" + std::to_string(decoder.f.rs1) + ")\r\n";
+    std::cout << i_name + " x" + std::to_string(decoder.f.rs2) + ", " + std::to_string(int(imm)) + "(x" + std::to_string(decoder.f.rs1) + ")\r\n";
 #endif
     return pc+4;
 }
@@ -429,8 +441,8 @@ unsigned int BranchDecoder::decode (unsigned int pc, unsigned int inst) {
             }
             break;
         default:
-            std::cerr << "Invalid funct3 while branch decoding: " << decoder.f.funct3 << "\n";
-            exit(1);
+            term->terminate("Invalid funct3 while decoding branch instruction: "
+                            + std::to_string(decoder.f.funct3) + "\n", 1);
     }
 #ifdef DEBUG
     std::cout << i_name + " x" + std::to_string(decoder.f.rs1) + ", x" + std::to_string(decoder.f.rs2) + ", " + std::to_string(int(imm)) + "\r\n";
@@ -478,8 +490,8 @@ unsigned int JumpLinkDecoder::decode (unsigned int pc, unsigned int inst) {
     decoder.inst = inst;
 
     // TODO: test
-    imm = (decoder.f.imm10_1 << 1u) | (decoder.f.imm11 << 11u) |
-          (decoder.f.imm19_12 << 12u) | (decoder.f.imm20 << 20u);
+    imm = (decoder.f.imm19_12 << 12u) | (decoder.f.imm11 << 11u) |
+          (decoder.f.imm10_1 << 1u) | (decoder.f.imm20 << 20u);
     // sign-extend if negative
     if (imm & 0x100000) {
         imm |= 0xFFE00000;
@@ -522,15 +534,7 @@ unsigned int JumpLinkRegDecoder::decode (unsigned int pc, unsigned int inst) {
 #ifdef DEBUG
     std::cout << "jalr x" + std::to_string(decoder.f.rd) + ", x" + std::to_string(decoder.f.rs1) + ", " + std::to_string(int(imm)) + "\r\n";
 #endif
-    return pc + offset;
-}
-
-InstructionDecoder::InstructionDecoder () {
-    reg = RegisterFile::getInstance();
-    stack = Stack::getInstance();
-    rs1 = 0;
-    rs2 = 0;
-    imm = 0;
+    return offset;
 }
 
 /**
@@ -543,6 +547,10 @@ unsigned int EcallDecoder::decode(unsigned int pc, unsigned int inst) {
     i_inst_t decoder{};
     decoder.inst = inst;
 
+#ifdef DEBUG
+    std::cout << "ecall\r\n";
+#endif
+
     //temp
     rs1 = reg->read(decoder.f.rs1);
     imm = decoder.f.imm;
@@ -551,30 +559,18 @@ unsigned int EcallDecoder::decode(unsigned int pc, unsigned int inst) {
     if (imm == 0 && decoder.f.funct3 == 0) {
         switch (reg->read(RegisterFile::x10)) {
             case 10: // exit
-                // terminate correctly
-                // print registers
+                term->terminate("Ecall 10 reached", 0);
                 break;
             case 17: // exit2
-                // terminate with error
-                // print registers
+                term->terminate("Ecall 12 reached - exit code: "
+                                + std::to_string(reg->read(RegisterFile::x11)) , 0);
                 break;
             default:
-                std::cerr << "Unsupported instruction\r\n";
-                exit(1);
+                term->terminate("Unsupported instruction", 1);
         }
     } else {
-        std::cerr << "Unsupported instruction\r\n";
-        exit(1);
+        term->terminate("Unsupported instruction", 1);
     }
 
-    // Should I implement this somehow, to indicate we are at the end of file,
-    // in order to jump out of the main while-loop
-    //sim.executeInstruction() = EXEC_EOF
-
-    //Ecall
-#ifdef DEBUG
-    std::cout << "ecall\r\n";
-#endif
-    // FIXME: Should it return program counter or just -1??
     return -1;
 }

@@ -23,7 +23,9 @@ unsigned int RegisterFile::read(RegisterFile::Register reg) {
 
 void RegisterFile::write (RegisterFile::Register reg, unsigned int data) {
     if (reg == x0) {
+#ifdef DEBUG
         std::cout << "Register x0 cannot be written to\n";
+#endif
         return;
     }
     m_reg_file[reg] = data;
