@@ -4,7 +4,10 @@ set(EXECUTABLE isa_sim_cpp)
 project(${EXECUTABLE})
 
 set(CMAKE_CXX_STANDARD 17)
-add_definitions(-std=c++17 -DDEBUG)
+add_definitions(-std=c++17)
+
+# uncomment to enable debug messages
+#add_definitions(-DDEBUG)
 
 set(SOURCES
         main.cpp
