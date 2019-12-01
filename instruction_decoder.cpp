@@ -78,28 +78,34 @@ unsigned int RegArithLogDecoder::i_extension_decode (unsigned int pc, r_inst_t d
             break;
         case 0b011:
             // SLTU
+            i_name = "sltu";
             reg->write(decoder.f.rd, rs1 < rs2);
             break;
         case 0b100:
             // XOR
+            i_name = "xor";
             reg->write(decoder.f.rd, rs1 ^ rs2);
             break;
         case 0b101:
             // check the bit 6 in funct7
             if (!(decoder.f.funct7 & 0x20u)) {
                 // SRL
+                i_name = "srl";
                 reg->write(decoder.f.rd, rs1 >> rs2);
             } else {
                 // SRA
-                reg->write(decoder.f.rd, int(rs1) / int(pow(2.,rs2)));
+                i_name = "sra";
+                reg->write(decoder.f.rd, int(rs1) >> rs2);
             }
             break;
         case 0b110:
             // OR
+            i_name = "or";
             reg->write(decoder.f.rd, rs1 | rs2);
             break;
         case 0b111:
             // AND
+            i_name = "and";
             reg->write(decoder.f.rd, rs1 & rs2);
             break;
         default:
@@ -121,7 +127,9 @@ unsigned int RegArithLogDecoder::i_extension_decode (unsigned int pc, r_inst_t d
  * @return          new program counter
  */
 unsigned int RegArithLogDecoder::m_extension_decode (unsigned int pc, r_inst_t decoder) {
-    long long temp;
+    long long s_rd, s_rs1, s_rs2;
+    unsigned long long u_rd, u_rs1, u_rs2;
+
     rs1 = reg->read(decoder.f.rs1);
     rs2 = reg->read(decoder.f.rs2);
 
@@ -136,40 +144,75 @@ unsigned int RegArithLogDecoder::m_extension_decode (unsigned int pc, r_inst_t d
         case 0b001:
             // MULH
             i_name = "mulh";
-            temp = int(rs1) * int(rs2);
-            reg->write(decoder.f.rd, temp >> 32);
+            u_rs1 = rs1;
+            if (u_rs1 && 0x80000000llu) {
+                u_rs1 |= 0xFFFFFFFF00000000;
+            }
+            u_rs2 = rs2;
+            if (u_rs2 && 0x80000000llu) {
+                u_rs2 |= 0xFFFFFFFF00000000;
+            }
+            u_rd = u_rs1 * u_rs2;
+            reg->write(decoder.f.rd, u_rd >> 32);
             break;
         case 0b010:
             // MULHSU
             i_name = "mulhsu";
-            temp = int(rs1) * rs2;
-            reg->write(decoder.f.rd, temp >> 32);
+            u_rs1 = rs1;
+            if (u_rs1 && 0x80000000llu) {
+                u_rs1 |= 0xFFFFFFFF00000000;
+            }
+            u_rs2 = rs2;
+            u_rd = u_rs1 * u_rs2;
+            reg->write(decoder.f.rd, u_rd >> 32);
             break;
         case 0b011:
             // MLHU
             i_name = "mlhu";
-            temp = rs1 * rs2;
-            reg->write(decoder.f.rd, temp >> 32);
+            u_rs1 = rs1;
+            u_rs2 = rs2;
+            u_rd = u_rs1 * u_rs2;
+            reg->write(decoder.f.rd, u_rd >> 32);
             break;
         case 0b100:
             // DIV
             i_name = "div";
-            reg->write(decoder.f.rd, int(rs1) / int(rs2));
+            if (rs2 == 0) {
+                reg->write(decoder.f.rd, -1);
+            } else if (rs1 == 0x80000000 && rs2 == 0xFFFFFFFF) {
+                reg->write(decoder.f.rd, 0x80000000);
+            } else {
+                reg->write(decoder.f.rd, int(rs1) / int(rs2));
+            }
             break;
         case 0b101:
             // DIVU
             i_name = "divu";
-            reg->write(decoder.f.rd, rs1 / rs2);
+            if (rs2 == 0) {
+                reg->write(decoder.f.rd, rs1); // doesn't make sense
+            } else {
+                reg->write(decoder.f.rd, rs1 / rs2);
+            }
             break;
         case 0b110:
             // REM
             i_name = "rem";
-            reg->write(decoder.f.rd, int(rs1) % int(rs2));
+            if (rs2 == 0) {
+                reg->write(decoder.f.rd, rs1);
+            } else if (rs1 == 0x80000000 && rs2 == 0xFFFFFFFF) {
+                reg->write(decoder.f.rd, 0);
+            } else {
+                reg->write(decoder.f.rd, int(rs1) % int(rs2));
+            }
             break;
         case 0b111:
             // REMU
             i_name = "remu";
-            reg->write(decoder.f.rd, rs1 % rs2);
+            if (rs2 == 0) {
+                reg->write(decoder.f.rd, rs1);
+            } else {
+                reg->write(decoder.f.rd, rs1 % rs2);
+            }
             break;
         default:
             term->terminate("Invalid funct3 while decoding register-register arithemtic or logical instruction (M): "
@@ -236,7 +279,7 @@ unsigned int ImmArithLogDecoder::decode (unsigned int pc, unsigned int inst) {
                 // SRAI
                 i_name = "srai";
                 imm &= 0x1F;
-                reg->write(decoder.f.rd, int(rs1) / int(pow(2.,imm)));
+                reg->write(decoder.f.rd, int(rs1) >> imm);
             }
             break;
         case 0b110:

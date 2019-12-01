@@ -38,13 +38,13 @@ unsigned char Stack::readByte (unsigned int sp) {
 
 unsigned short Stack::readHalf (unsigned int sp) {
     unsigned int index = stack_pointer_to_index(sp);
-    unsigned short data = m_stack.at(index) + (m_stack.at(index+1) << 8);
+    unsigned short data = m_stack.at(index) + (m_stack.at(index-1) << 8);
     return data;
 }
 
 unsigned int Stack::readWord (unsigned int sp) {
     unsigned int index = stack_pointer_to_index(sp);
-    unsigned int data = m_stack.at(index) + (m_stack.at(index+1) << 8) + (m_stack.at(index+2) << 18) + (m_stack.at(index+3) << 24);
+    unsigned int data = m_stack.at(index) + (m_stack.at(index-1) << 8) + (m_stack.at(index-2) << 16) + (m_stack.at(index-3) << 24);
     return data;
 }
 

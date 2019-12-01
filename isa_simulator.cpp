@@ -54,7 +54,6 @@ bool ISA_Simulator::loadFile (const char *filepath) {
     }
 
     auto *temp = reinterpret_cast<unsigned int*>(lines.data());
-    std::cout << temp[4];
     raw_insts.insert(raw_insts.end(), &temp[0], &temp[lines.length() / 4]);
     return true;
 }
