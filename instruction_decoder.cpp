@@ -3,7 +3,6 @@
 //
 
 #include <iostream>
-#include <cmath>
 #include <string>
 #include "instruction_decoder.h"
 
@@ -127,8 +126,8 @@ unsigned int RegArithLogDecoder::i_extension_decode (unsigned int pc, r_inst_t d
  * @return          new program counter
  */
 unsigned int RegArithLogDecoder::m_extension_decode (unsigned int pc, r_inst_t decoder) {
-    long long s_rd, s_rs1, s_rs2;
-    unsigned long long u_rd, u_rs1, u_rs2;
+    int32_t s_rd, s_rs1, s_rs2;
+    uint64_t u_rd, u_rs1, u_rs2;
 
     rs1 = reg->read(decoder.f.rs1);
     rs2 = reg->read(decoder.f.rs2);
@@ -142,28 +141,15 @@ unsigned int RegArithLogDecoder::m_extension_decode (unsigned int pc, r_inst_t d
             reg->write(decoder.f.rd, rs1 * rs2);
             break;
         case 0b001:
-            // MULH
+            // MULH - not tested yet
             i_name = "mulh";
-            u_rs1 = rs1;
-            if (u_rs1 && 0x80000000llu) {
-                u_rs1 |= 0xFFFFFFFF00000000;
-            }
-            u_rs2 = rs2;
-            if (u_rs2 && 0x80000000llu) {
-                u_rs2 |= 0xFFFFFFFF00000000;
-            }
-            u_rd = u_rs1 * u_rs2;
-            reg->write(decoder.f.rd, u_rd >> 32);
+            s_rd = int32_t((int64_t(rs1) * int64_t(rs2)) >> 32);
+            reg->write(decoder.f.rd, s_rd);
             break;
         case 0b010:
-            // MULHSU
+            // MULHSU - not tested yet
             i_name = "mulhsu";
-            u_rs1 = rs1;
-            if (u_rs1 && 0x80000000llu) {
-                u_rs1 |= 0xFFFFFFFF00000000;
-            }
-            u_rs2 = rs2;
-            u_rd = u_rs1 * u_rs2;
+            u_rd = uint32_t((int64_t(rs1) * uint64_t(rs2)) >> 32);
             reg->write(decoder.f.rd, u_rd >> 32);
             break;
         case 0b011:

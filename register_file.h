@@ -20,7 +20,7 @@ public:
     void write (Register reg, unsigned int data);
     unsigned int read (Register reg);
     void print_registers ();
-    void dump_reg ();
+    void dump_registers ();
 private:
     static RegisterFile* instance;
     RegisterFile();

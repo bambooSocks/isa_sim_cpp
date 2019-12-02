@@ -29,7 +29,7 @@ private:
     unsigned int pc;
     Termination *term;
     RegisterFile *registerFile;
-    std::vector<unsigned int> raw_insts;
+    std::vector<unsigned int> inst_mem;
     std::map<unsigned int, InstructionDecoder*> opcode_map;
 };
 

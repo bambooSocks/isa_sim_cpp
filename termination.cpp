@@ -6,7 +6,7 @@
 #include "termination.h"
 
 void Termination::terminate (const std::string &msg, int exit_code) {
-    registerFile->dump_reg();
+    registerFile->dump_registers();
     if (exit_code == 0) {
         std::cout << "\x1B[1;32m" << msg << "\x1B[0m\r\n\r\n";
         registerFile->print_registers();

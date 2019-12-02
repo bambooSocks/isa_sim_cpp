@@ -9,7 +9,9 @@
 #include <string>
 #include "isa_simulator.h"
 
-
+/**
+ * ISA Simulator constructor: initializes the objects and the opcode map
+ */
 ISA_Simulator::ISA_Simulator () {
     pc = 0;
     registerFile = RegisterFile::getInstance();
@@ -54,19 +56,19 @@ bool ISA_Simulator::loadFile (const char *filepath) {
     }
 
     auto *temp = reinterpret_cast<unsigned int*>(lines.data());
-    raw_insts.insert(raw_insts.end(), &temp[0], &temp[lines.length() / 4]);
+    inst_mem.insert(inst_mem.end(), &temp[0], &temp[lines.length() / 4]);
     return true;
 }
 
 /**
- *
+ * Fetch and execute next instruction from the instruction memory
  * @return  false if EOF is reached otherwise true
  */
 exec_result_t ISA_Simulator::executeInstruction () {
     unsigned char opcode = 0;
     try {
         // fetch instruction
-        unsigned int inst = raw_insts.at(pc / 4);
+        unsigned int inst = inst_mem.at(pc / 4);
         // decode instruction and execute
         opcode = inst & 0x0000007Fu;
 
@@ -82,9 +84,9 @@ exec_result_t ISA_Simulator::executeInstruction () {
         std::string exception = e.what();
         // distinguish between individual exceptions
         if (exception.find("vector::_M_range_check") != std::string::npos) {
-            // out of range of raw_insts
+            // out of range of inst_mem
             //TODO: test this
-            if (pc == raw_insts.size()*4 + 4) {
+            if (pc == inst_mem.size() * 4 + 4) {
                 // one further than the size => EOF
                 term->terminate("End of file reached", 0);
                 return EXEC_EOF;

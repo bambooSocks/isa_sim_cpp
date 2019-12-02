@@ -10,12 +10,20 @@
 
 RegisterFile* RegisterFile::instance = nullptr;
 
+/**
+ * Register file constructor
+ */
 RegisterFile::RegisterFile () {
-    for (int i = 0; i < m_reg_file.size(); i++) {
-        m_reg_file[i] = 0;
+    for (unsigned int & i : m_reg_file) {
+        i = 0;
     }
 }
 
+/**
+ * Read register from register file
+ * @param reg   Register number
+ * @return      Data stored in the register
+ */
 unsigned int RegisterFile::read(RegisterFile::Register reg) {
     if (reg == x0) {
         return 0;
@@ -23,6 +31,11 @@ unsigned int RegisterFile::read(RegisterFile::Register reg) {
     return m_reg_file[reg];
 }
 
+/**
+ * Write data to register
+ * @param reg   Register number
+ * @param data  Data to be stored in register
+ */
 void RegisterFile::write (RegisterFile::Register reg, unsigned int data) {
     if (reg == x0) {
 #ifdef DEBUG
@@ -33,6 +46,9 @@ void RegisterFile::write (RegisterFile::Register reg, unsigned int data) {
     m_reg_file[reg] = data;
 }
 
+/**
+ * Print out the contents of Register File
+ */
 void RegisterFile::print_registers () {
     std::cout << "\033[1mRegister file:\033[0m\n";
     std::cout << "\033[1;31mRegister\033[0m    \033[1;33mHex\033[0m           \033[1;34mDec Unsigned(Dec Signed)\033[0m\n";
@@ -50,6 +66,10 @@ void RegisterFile::print_registers () {
             std::cout << std::dec << "    \033[94m" << m_reg_file[i] << "(" << int(m_reg_file[i]) << ")\033[0m\n";
  */
 
+/**
+ * Gets singleton instance of the Register File
+ * @return  instance of singleton
+ */
 RegisterFile *RegisterFile::getInstance () {
     if (instance == nullptr) {
         instance = new RegisterFile();
@@ -57,18 +77,14 @@ RegisterFile *RegisterFile::getInstance () {
     return instance;
 }
 
-void RegisterFile::dump_reg () {
+/**
+ * Dumps register file into a binary output.res file
+ */
+void RegisterFile::dump_registers () {
     std::filesystem::path path{"./output.res"};
 
     std::ofstream ofs(path);
-    char buffer[32*4] = {0};
-    int idx = 0;
-    for (unsigned int i: m_reg_file) {
-        buffer[idx++] = char(i & 0xFF);
-        buffer[idx++] = char((i >> 8) & 0xFF);
-        buffer[idx++] = char((i >> 16) & 0xFF);
-        buffer[idx++] = char((i >> 24) & 0xFF);
-    }
+    auto buffer = reinterpret_cast<char *>(m_reg_file.data());
 
     ofs.write(buffer, 32*4);
     ofs.close();
