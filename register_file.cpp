@@ -52,7 +52,16 @@ void RegisterFile::dump_reg () {
     std::filesystem::path path{"./output.res"};
 
     std::ofstream ofs(path);
-    ofs << "xxx\r\n";
+    char buffer[32*4] = {0};
+    int idx = 0;
+    for (unsigned int i: m_reg_file) {
+        buffer[idx++] = char(i & 0xFF);
+        buffer[idx++] = char((i >> 8) & 0xFF);
+        buffer[idx++] = char((i >> 16) & 0xFF);
+        buffer[idx++] = char((i >> 24) & 0xFF);
+    }
+
+    ofs.write(buffer, 32*4);
     ofs.close();
 }
 

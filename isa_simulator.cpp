@@ -52,7 +52,6 @@ bool ISA_Simulator::loadFile (const char *filepath) {
         }
         file.close();
     }
-    registerFile->dump_reg();
 
     auto *temp = reinterpret_cast<unsigned int*>(lines.data());
     raw_insts.insert(raw_insts.end(), &temp[0], &temp[lines.length() / 4]);
