@@ -92,13 +92,13 @@ exec_result_t ISA_Simulator::executeInstruction () {
                 return EXEC_EOF;
             } else {
                 //wrong address (pc)
-                term->terminate("Wrong instruction address: pc = " + std::to_string(pc), -1);
+                term->terminate("Wrong instruction address: pc = " + std::to_string(pc), 2);
                 return EXEC_ERROR;
             }
         } else if (exception.find("map::at") != std::string::npos) {
             // wrong opcode
             term->terminate("Wrong opcode or not implemented instruction: opcode="
-                               + std::bitset<7>(opcode).to_string(), -1);
+                               + std::bitset<7>(opcode).to_string(), 1);
             return EXEC_ERROR;
         } else {
             // other error
