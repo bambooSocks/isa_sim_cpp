@@ -1,6 +1,6 @@
-//
-// Created by matej on 11/29/19.
-//
+// termination.cpp
+// Matej Majtan (s184457) & Søren Tønnesen (s180381)
+// 02-12-2019
 
 #include <iostream>
 #include "termination.h"

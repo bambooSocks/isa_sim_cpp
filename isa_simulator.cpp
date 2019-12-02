@@ -1,6 +1,6 @@
-//
-// Created by matej on 10/14/19.
-//
+// isa_simulator.cpp
+// Matej Majtan (s184457) & Søren Tønnesen (s180381)
+// 02-12-2019
 
 #include <filesystem>
 #include <iostream>
