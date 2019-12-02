@@ -34,12 +34,21 @@ void RegisterFile::write (RegisterFile::Register reg, unsigned int data) {
 }
 
 void RegisterFile::print_registers () {
-    std::cout << "Register file:\n";
+    std::cout << "\033[1mRegister file:\033[0m\n";
+    std::cout << "\033[1;31mRegister\033[0m    \033[1;33mHex\033[0m           \033[1;34mDec Unsigned(Dec Signed)\033[0m\n";
     for (unsigned long i = 0; i < m_reg_file.size(); i++) {
-        std::cout << std::dec << "x" << i << " - " << m_reg_file[i] << "(" << int(m_reg_file[i]) << "), ";
-        std::cout << "0x" << std::setfill('0') << std::setw(8) << std::hex << m_reg_file[i] << "\n";
+
+            std::cout << std::dec  << "x" << std::setfill('0') << std::setw(2) << i << "         ";
+            std::cout << "0x" << std::setfill('0') << std::setw(8) << std::hex << m_reg_file[i];
+            std::cout << std::dec << "    " << m_reg_file[i] << "(" << int(m_reg_file[i]) << ")\n";
+
     }
 }
+/*          Red: 31, BrightRed: 91, Green: 32, BrightGreen: 92, Blue: 34, BrightBlue: 34
+            std::cout << std::dec  << "\033[91mx" << std::setfill('0') << std::setw(2) << i << "\033[0m         ";
+            std::cout << "\033[92m0x" << std::setfill('0') << std::setw(8) << std::hex << m_reg_file[i] << "\033[0m";
+            std::cout << std::dec << "    \033[94m" << m_reg_file[i] << "(" << int(m_reg_file[i]) << ")\033[0m\n";
+ */
 
 RegisterFile *RegisterFile::getInstance () {
     if (instance == nullptr) {
