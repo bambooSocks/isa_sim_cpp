@@ -1,6 +1,6 @@
-//
-// Created by matej on 11/19/19.
-//
+// stack.cpp
+// Matej Majtan (s184457) & Søren Tønnesen (s180381)
+// 02-12-2019
 
 #include "stack.h"
 

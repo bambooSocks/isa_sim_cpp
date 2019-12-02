@@ -1,6 +1,6 @@
-//
-// Created by matej on 10/14/19.
-//
+// instruction_decoder.cpp
+// Matej Majtan (s184457) & Søren Tønnesen (s180381)
+// 02-12-2019
 
 #include <iostream>
 #include <string>

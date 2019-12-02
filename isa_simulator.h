@@ -1,6 +1,6 @@
-//
-// Created by matej on 10/14/19.
-//
+// isa_simulator.h
+// Matej Majtan (s184457) & Søren Tønnesen (s180381)
+// 02-12-2019
 
 #ifndef ISA_SIM_CPP_ISA_SIMULATOR_H
 #define ISA_SIM_CPP_ISA_SIMULATOR_H

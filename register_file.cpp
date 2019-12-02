@@ -1,6 +1,6 @@
-//
-// Created by matej on 10/10/19.
-//
+// register_file.cpp
+// Matej Majtan (s184457) & Søren Tønnesen (s180381)
+// 02-12-2019
 
 #include <iostream>
 #include <iomanip>
