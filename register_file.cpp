@@ -4,6 +4,8 @@
 
 #include <iostream>
 #include <iomanip>
+#include <filesystem>
+#include <fstream>
 #include "register_file.h"
 
 RegisterFile* RegisterFile::instance = nullptr;
@@ -45,3 +47,12 @@ RegisterFile *RegisterFile::getInstance () {
     }
     return instance;
 }
+
+void RegisterFile::dump_reg () {
+    std::filesystem::path path{"./output.res"};
+
+    std::ofstream ofs(path);
+    ofs << "xxx\r\n";
+    ofs.close();
+}
+
