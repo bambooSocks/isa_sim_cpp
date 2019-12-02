@@ -19,4 +19,4 @@ make
 
 ### Running the program
 
-In order to run the software run the executable in `build` folder using command: `./isa_sim_cpp <path_to_binary>`. The path to binary denotes path to the binary simulator should simulate.
+In order to run the software run the executable in `build` folder using command: `./isa_sim_cpp <path_to_binary>`. The `<path_to_binary>` denotes the path to the binary file.
